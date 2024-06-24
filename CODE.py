@@ -1,11 +1,12 @@
 import requests
 from tok import token
 import codecs
+import json
 
 group_id="footballpremierleague_hse"
 #
 count=20
-fields="sex,domain"
+fields="sex"
 
 
 url=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&count={count}&fields={fields}&access_token={token}&v=5.199"
@@ -21,19 +22,10 @@ for item in posts:
         if item["sex"]==1:
             continue
         else:
+            link="https://vk.com/id"+str(item["id"])
+            id=item["id"]
+            json_per='{"'+str(id)+'":"'+link+'"}'
 
-            print(item["id"])
-            print(item["sex"])
-            print(item["domain"])
     except:
         continue
 
-# f = codecs.open("PEOPLE.JSON", "a", "utf_8_sig")
-# f.write(str({"123":"id"+item["id"]}))
-# f.close()
-
-# users.getSubscriptions
-# src=req.json
-# ID_user=src["response"]["items"]
-# print(req.text)
-# print(ID_user)
