@@ -19,21 +19,47 @@ url_group=f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&e
 # f=codecs.open("PEOPLE.JSON", "w", "utf_8_sig")
 # f.close()
 # f=codecs.open("PEOPLE.JSON", "a", "utf_8_sig")
-req=requests.get(url_user_group)
-src=req.json()
-posts=src["response"]["items"]
-for item in posts:
-    try:
-        if item["sex"]==1:
-            continue
-        else:
-            link="https://vk.com/id"+str(item["id"])
-            id=item["id"]
-            # json_per='{"'+str(id)+'":"'+link+'"}'+"\n"
-            json_per = '{"ID" : "' + str(id) + '"' + ' ,"link" : ' +link+'"}' + "\n"
-            f = codecs.open("PEOPLE.JSON", "a", "utf_8_sig")
-            f.write(json_per)
-            f.close()
-    except:
-        continue
+# req=requests.get(url_user_group)
+# src=req.json()
+# posts=src["response"]["items"]
+# for item in posts:
+#     try:
+#         if item["sex"]==1:
+#             continue
+#         else:
+#             link="https://vk.com/id"+str(item["id"])
+#             id=item["id"]
+#             # json_per='{"'+str(id)+'":"'+link+'"}'+"\n"
+#             json_per = '{"ID" : "' + str(id) + '"' + ' ,"link" : ' +link+'"}' + "\n"
+#             f = codecs.open("PEOPLE.JSON", "a", "utf_8_sig")
+#             f.write(json_per)
+#             f.close()
+#     except:
+#         continue
 
+def user_from_group(group_id, count, token):
+    fields = "sex"
+    url_user_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&count={count}&fields={fields}&access_token={token}&v=5.199"
+    req = requests.get(url_user_group)
+    src = req.json()
+    posts = src["response"]["items"]
+    for item in posts:
+        try:
+            if item["sex"] == 1:
+                continue
+            else:
+                link = "https://vk.com/id" + str(item["id"])
+                id = item["id"]
+                json_per = '{"ID" : "' + str(id) + '"' + ' ,"link" : ' + link + '"}' + "\n"
+                f = codecs.open("PEOPLE.JSON", "a", "utf_8_sig")
+                f.write(json_per)
+                f.close()
+        except:
+            continue
+
+def group_users(user_id, token):
+    extended = "1"
+    fields_group = "activity"
+    url_group=f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+
+    
