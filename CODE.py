@@ -4,6 +4,7 @@ import codecs
 import json
 import datetime
 from datetime import datetime
+import time
 
 group_id="footballpremierleague_hse"
 # group_id="ultdank"
@@ -12,9 +13,16 @@ count=100
 fields="sex"
 fields_group="activity"
 extended="1"
-football=["football","Футбол"]
+football_teg=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football"]
+group_teg=["Спортивная команда", "Спортивная организация", ""]
 
-def user_from_group(group_id, count, token):
+# Создаём необходимые json файлы для дальнейшей работы с ними
+# f = open("people.json", "w")
+# f.close()
+# f = open("football_groups.json", "w")
+# f.close()
+
+def user_from_group(group_id, count, token,football_teg):
     # Загружаем JSON файл, с пользователями группы
     json_per = []
     fields = "sex,is_closed,city,bdate,deactivated"
@@ -42,7 +50,7 @@ def user_from_group(group_id, count, token):
 
             else:
                 id = item["id"]
-                link = "https://vk.com/id" + str(id)
+                link = "https://vk.com/public" + str(id)
 
                 # Проверяем закрытый ли у пользователя профиль, где True - закрытый
                 open_close = item["is_closed"]
@@ -50,7 +58,7 @@ def user_from_group(group_id, count, token):
                 if open_close:
                     # Записываем json строку, если профиль - закрытый
                     json_per.append(
-                        {"ID": id, "LINK": link, "CLOSE": open_close, "CITY": "НЕ УКАЗАНО", "AGE": "НЕ УКАЗАНО"}
+                        {"ID": id, "LINK": link, "CLOSE": open_close, "CITY": "НЕ УКАЗАНО", "AGE": "НЕ УКАЗАНО", "GROUPS": "НЕ УКАЗАНО"}
                     )
                 else:
 
@@ -74,8 +82,11 @@ def user_from_group(group_id, count, token):
                     except:
                         city="НЕ УКАЗАНО"
 
-                # Записываем файл в массив с json строками
-                json_per.append({"ID": id, "LINK": link, "CLOSE": open_close, "CITY": city, "AGE": age})
+                    # Записываем файл в массив с json строками
+                    data = group_users(id, token, football_teg)
+                    if data==[]:
+                        data="Сообщества скрыты"
+                    json_per.append({"ID": id, "LINK": link, "CLOSE": open_close, "CITY": city, "AGE": age, "GROUPS": data})
 
                 # Собираем группы, на которые подписан пользователь
 
@@ -84,16 +95,79 @@ def user_from_group(group_id, count, token):
     return json_per
 
 
+# Функция по получению сообществ на которые подписан пользователь
+def group_users(user_id, token, football_teg):
+    # копируем содержимое json файла с сообществами на футбольную тематику в массив
+    f = codecs.open("football_groups.json", "r", "utf_8")
+    group_mass=json.load(f)
+    f.close()
+    # Создаём массив для записи групп пользователя
+    append_js=[]
 
-def group_users(user_id, token):
+    # Фильтр для запроса, показывает вместе страницы и группы, что упрощает вызов информации о них
     extended = "1"
-    fields_group = "activity"
-    url_user_group=f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+    # https: // dev.vk.com / ru / reference / objects / group - документация по фильтрам
+    fields_group = "activity,deactivated,description,is_closed"
+
+    url_user_group = f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+
+    # У ВК стоит ограничение на 5 запросов в секунду, строчка наобходима чтобы соответсвовать ему
+    time.sleep(0.2)
     req = requests.get(url_user_group)
     src = req.json()
-    posts = src["response"]["items"]
+    gruops = src["response"]["items"]
+
+    # Идёт в цикле по всем подпискам пользователя
+    for gruop in gruops:
+        # Проверяем работает ли группа
+        try:
+            work=gruop["deactivated"]
+            continue
+        except:
+            # Отфильтровываем страницы от групп
+            if gruop["type"] == "page":
+
+                # Проверяем тему сообщества, если она Футбол, то записываем группу
+                theme = gruop["activity"]
+                if theme=="Футбол":
+                    id=gruop["id"]
+                    link = "https://vk.com/public" + str(id)
+                    name=gruop["name"]
+                    data={"ID":id, "LINK":link, "NAME":name, "theme":"Футбол"}
+                    # Проверяем нет ли повторяющихся сообществ
+                    if data not in group_mass:
+                        group_mass.append(data)
+
+                    append_js.append(data)
+
+                # Если тема не футбол, проверяем ключевые слова в загаловки сообщества, а так же в описании
+                else:
+                    name = gruop["name"]
+                    description=gruop["description"]
+
+                    # Идём в цикле по тегам
+                    for teg in football_teg:
+                        if (teg in name) or (teg in description):
+                            id = gruop["id"]
+                            link = "https://vk.com/public" + str(id)
+                            name = gruop["name"]
+                            data = {"ID": id, "LINK": link, "NAME": name, "theme":theme}
+                            # Проверяем нет ли повторяющихся сообществ
+                            if data not in group_mass:
+                                group_mass.append(data)
+                            append_js.append(data)
+                        else:
+                            continue
+
+
+
+    # Записываем найденный сообщества по футболу в json файл
+    f = codecs.open("football_groups.json", "w", "utf_8")
+    json.dump(group_mass, f)
+    f.close()
+    return append_js
 
 
 f = codecs.open("people.json", "w", "utf_8")
-json.dump(user_from_group(group_id, count, token), f)
+json.dump(user_from_group(group_id, count, token,football_teg), f)
 f.close()
