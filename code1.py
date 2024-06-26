@@ -46,7 +46,7 @@ def zapr_mass(file,zapr):
             a.append(item[zapr])
     return a
 
-def glue_mass(fields,group_id,token):
+def glue_mass_people(fields,group_id,token):
     offset =0
     mass1=[]
     while True:
@@ -110,22 +110,77 @@ def filter_age(posts, filtre_age):
             mass.append(item)
     return mass
 
+def glue_mass_group(user_id, token, fields_group):
+    offset = 0
+    extended="1"
+    mass1=[]
+    while True:
+        url = f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&offset={offset}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+        mass2 = request_zapros(url)
+        if mass2!=[]:
+            mass1=np.hstack([mass1, mass2])
+            offset += 1000
+        else:
+            break
+    return mass1
+
+def filter_gruops_deactivated(gruops):
+    mass=[]
+    for item in gruops:
+        try:
+            banned = item["deactivated"]
+        except:
+            mass.append(item)
+    return mass
+def filter_groups_page(gruops):
+    mass=[]
+    for item in gruops:
+        if item["type"]=="page":
+            mass.append(item)
+    return mass
+
+def filter_group_activity(gruops,ban_activity):
+    mass=[]
+    for item in gruops:
+        if item["activity"] not in ban_activity:
+            mass.append(item)
+    return mass
+
+
+def filter_group_close(gruops):
+    mass=[]
+    for item in gruops:
+        if item["is_closed"] == 0:
+            mass.append(item)
+    return mass
+
+
+def filter_group_keyword(gruops, football_keyword):
+    mass=[]
+    for item in gruops:
+        name = item["name"]
+        description = item["description"]
+        if item["activity"]=="Футбол":
+            mass.append(item)
+        else:
+            for teg in football_keyword:
+                if (teg in name) or (teg in description):
+                    mass.append(item)
+                    break
+    return mass
+
 
 def user_from_group(group_id, token, ban_city, fields, filtre_age):
     json_open = []
     json_close = []
     j = 0
     k=0
-    posts = glue_mass(fields, group_id, token)
 
+    posts = glue_mass_people(fields, group_id, token)
     posts=filter_banned(posts)
-
     posts= filter_sex(posts)
-
     posts, close_posts = filter_close(posts)
-
     posts = filter_city(posts,ban_city)
-
     posts = filter_age(posts, filtre_age)
 
     for item in posts:
@@ -143,8 +198,48 @@ def user_from_group(group_id, token, ban_city, fields, filtre_age):
         k+=1
         js_a = {"NUMBER":k,"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
         json_close.append(js_a)
+
     return json_open, json_close
 
+def groups_users(user_id, token, football_keyword, ban_activity):
+    group_mass = open_json("football_groups.json")
+    append_js = []
+
+    gruops = glue_mass_group(user_id, token, fields_group)
+    gruops = filter_gruops_deactivated(gruops)
+    gruops = filter_groups_page(gruops)
+    gruops = filter_group_activity(gruops, ban_activity)
+    gruops = filter_group_keyword(gruops, football_keyword)
+
+    for gruop in gruops:
+        id_a=gruop["id"]
+        link = "https://vk.com/public" + str(id_a)
+        name = gruop["name"]
+        theme = gruop["activity"]
+        data = {"ID": id_a, "LINK": link, "NAME": name, "theme":theme}
+        if data not in group_mass:
+            group_mass.append(data)
+        append_js.append(data)
+    f = codecs.open("football_groups.json", "w", "utf_8")
+    json.dump(group_mass, f)
+    f.close()
+    return append_js
+    # time.sleep(0.2)
+
+
+
+
+def people_plus_groups(name, token, football_keyword, ban_activity):
+    people=open_json(name)
+    for item in people:
+        test=item.get("GROUPS", [])
+        if test==[]:
+            user_id=item["ID"]
+            user_id = item["ID"]
+            js_a=groups_users(user_id, token, football_keyword, ban_activity)
+            item["GROUPS"] = js_a
+
+    return people
 
 
 
@@ -154,24 +249,42 @@ def user_from_group(group_id, token, ban_city, fields, filtre_age):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+fields_group = "activity,deactivated,description,is_closed"
 group_id="footballpremierleague_hse"
 fields = "sex,is_closed,city,bdate,deactivated"
-ban_city=""
-football_teg=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
+ban_city=[""]
+football_keyword=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
 group_teg=["Спортивная команда", "Спортивная организация", ""]
 filtre_age=1000000
+ban_activity=""
+name="people_open.json"
+
+# js_open, js_close = user_from_group(group_id, token, ban_city, fields, filtre_age)
 
 
+# f = codecs.open("people_open.json", "w", "utf_8")
+# json.dump(js_open, f)
+# f.close()
+#
+# f = codecs.open("people_close.json", "w", "utf_8")
+# json.dump(js_close, f)
+# f.close()
 
-js_open, js_close = user_from_group(group_id, token, ban_city, fields, filtre_age)
 
+js_gr = people_plus_groups(name, token, football_keyword, ban_activity)
 
-f = codecs.open("people_open.json", "w", "utf_8")
-json.dump(js_open, f)
+f = codecs.open("people_open_with_groups.json", "w", "utf_8")
+json.dump(js_gr, f)
 f.close()
-
-f = codecs.open("people_close.json", "w", "utf_8")
-json.dump(js_close, f)
-f.close()
-
-

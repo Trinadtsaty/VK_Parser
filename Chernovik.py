@@ -29,7 +29,7 @@ from datetime import datetime
 # group_id=""
 from add_tok import token
 
-# def user_from_group(group_id, token):
+# def search_semen(group_id, token):
 #     # Загружаем JSON файл, с пользователями группы
 #     json_per = []
 #     fields = "first_name,last_name"
@@ -214,7 +214,38 @@ def user_from_group(group_id, token):
 # json.dump(user_from_group(group_id, token), f)
 # f.close()
 #
-with codecs.open('people_close.json', "r", "utf_8") as f:
+# with codecs.open('people_close.json', "r", "utf_8") as f:
+#     templates = json.load(f)
+# for i in templates:
+#     print(i)
+
+# def glue_mass_group(user_id, token, fields_group):
+#     offset = 0
+#     extended="1"
+#     mass1=[]
+#     while True:
+#         url = f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&offset={offset}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+#         mass2 = request_zapros(url)
+#         if mass2!=[]:
+#             mass1=np.hstack([mass1, mass2])
+#             offset += 1000
+#         else:
+#             break
+#     return mass1
+
+# user_id="240447380"
+# fields_group = "activity,deactivated,description,is_closed"
+# group_id="bastion_grosstald"
+#
+# prog=glue_mass_group(user_id, token, fields_group)
+# for i in prog:
+#     print(i)
+# f = codecs.open("people_open_with_groups.json", "w", "utf_8")
+# f.close()
+
+with codecs.open('people_open_with_groups.json', "r", "utf_8") as f:
     templates = json.load(f)
 for i in templates:
     print(i)
+
+
