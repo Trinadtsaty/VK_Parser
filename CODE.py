@@ -9,7 +9,7 @@ import time
 group_id="footballpremierleague_hse"
 # group_id="ultdank"
 #
-count=100
+# count=100
 fields="sex"
 fields_group="activity"
 extended="1"
@@ -41,7 +41,7 @@ def city(city):
     pass
 
 def request_zapros(url):
-    req = requests.get(url)
+    req = requests.get(url, verify=False)
     src = req.json()
     posts = src["response"]["items"]
     return posts
@@ -61,11 +61,13 @@ def zapr_mass(file,zapr):
             a.append(item[zapr])
     return a
 
-def user_from_group(group_id, count, token,football_teg):
+def user_from_group(group_id, token,football_teg):
     # Загружаем JSON файл, с пользователями группы
     json_per = []
+    json_per_close=[]
+    json_per_hide=[]
     fields = "sex,is_closed,city,bdate,deactivated"
-    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&count={count}&fields={fields}&access_token={token}&v=5.199"
+    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&fields={fields}&access_token={token}&v=5.199"
 
     posts = request_zapros(url_user_from_group)
 
@@ -95,7 +97,7 @@ def user_from_group(group_id, count, token,football_teg):
 
                 if open_close:
                     # Записываем json строку, если профиль - закрытый
-                    json_per.append(
+                    json_per_close.append(
                         {"ID": id, "LINK": link, "CLOSE": open_close, "CITY": "НЕ УКАЗАНО", "AGE": "НЕ УКАЗАНО", "GROUPS": "НЕ УКАЗАНО"}
                     )
                 else:
@@ -120,13 +122,16 @@ def user_from_group(group_id, count, token,football_teg):
                     data = group_users(id, token, football_teg)
                     if data==[]:
                         data="Сообщества скрыты"
-                    json_per.append({"ID": id, "LINK": link, "CLOSE": open_close, "CITY": city, "AGE": age, "GROUPS": data})
+                        json_per_hide.append(
+                            {"ID": id, "LINK": link, "CLOSE": open_close, "CITY": city, "AGE": age, "GROUPS": data})
+                    else:
+                        json_per.append({"ID": id, "LINK": link, "CLOSE": open_close, "CITY": city, "AGE": age, "GROUPS": data})
 
                 # Собираем группы, на которые подписан пользователь
 
 
 
-    return json_per
+    return json_per, json_per_hide, json_per_close
 
 
 # Функция по получению сообществ на которые подписан пользователь
@@ -198,7 +203,14 @@ def group_users(user_id, token, football_teg):
     f.close()
     return append_js
 
+json_per, json_per_hide, json_per_close = user_from_group(group_id, token,football_teg)
 
 f = codecs.open("people.json", "w", "utf_8")
-json.dump(user_from_group(group_id, count, token,football_teg), f)
+json.dump(json_per, f)
+f.close()
+f = codecs.open("people_close.json", "w", "utf_8")
+json.dump(json_per_close, f)
+f.close()
+f = codecs.open("people_hide.json", "w", "utf_8")
+json.dump(json_per_hide, f)
 f.close()

@@ -1,9 +1,0 @@
-
-51965431
-
-"type":"page"
-
-
-https://oauth.vk.com/authorize?
-client_id=51965431&
-display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=wall,groups,offline&response_type=token&v=5.126&state=123456

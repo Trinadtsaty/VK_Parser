@@ -2,6 +2,7 @@ import json
 import pandas
 import requests
 import codecs
+import numpy as np
 import datetime
 from datetime import datetime
 # with open('people.json') as f:
@@ -119,10 +120,10 @@ group_teg=["Спортивный клуб","Футбол", "Спортивная
 #     if i["theme"] not in a:
 #         a.append(i["theme"])
 # print(a)
-# with codecs.open('football_groups.json', "r", "utf_8") as f:
+# with codecs.open('people.json', "r", "utf_8") as f:
 #     templates = json.load(f)
 # for i in templates:
-#     print(i["theme"])
+#     print(i)
 
 def zapr_mass(file,zapr):
     a=[]
@@ -149,4 +150,71 @@ def serch_close(user_id, group_id, token):
     else:
         return False
 
-print(serch_close("15209","footballpremierleague_hse", token))
+def all_search(name1,name2,token):
+    new_spisok=[]
+    gruops=open_json(name1)
+    peoples=open_json(name2)
+    for people in peoples:
+        for group in gruops:
+            if serch_close(people["ID"], group["ID"], token):
+                a=people["GROUPS"]
+                a.append(group)
+                people["GROUPS"]=a
+
+
+def glue_mass(fields,group_id,token):
+    offset =0
+    mass1=[]
+    while True:
+        url = f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&offset={offset}&fields={fields}&access_token={token}&v=5.199"
+        mass2 = request_zapros(url)
+        if mass2!=[]:
+            mass1=np.hstack([mass1, mass2])
+            offset += 1000
+        else:
+            break
+    return mass1
+
+def user_from_group(group_id, token):
+    # Загружаем JSON файл, с пользователями группы
+    json_per = []
+    posts=[]
+    j=0
+    offset = 0
+    fields = "sex,is_closed,city,bdate,deactivated"
+    posts=glue_mass(fields,group_id,token)
+
+    # Идёт циклом по каждому пользователю
+    for item in posts:
+        # Получаем статус пользователя (отфильтровываем забаненные или удалённые страницы)
+        id = item["id"]
+        link = "https://vk.com/id" + str(id)
+        try:
+            time = item["deactivated"]
+            j += 1
+            json_a = {"NUMBER": j, "ID": id, "LINK": link, "CLOSE": time, "SEX":"ban"}
+            json_per.append(json_a)
+        except:
+            time=item["is_closed"]
+            sex=item["sex"]
+            try:
+                age=item["bdate"]
+            except:
+                age="NaN"
+
+            j += 1
+            json_a = {"NUMBER": j, "ID": id, "LINK": link, "CLOSE": time, "SEX":sex, "AGE": age}
+            json_per.append(json_a)
+
+
+    return json_per
+
+# group_id="footballpremierleague_hse"
+# f = codecs.open("people12.json", "w", "utf_8")
+# json.dump(user_from_group(group_id, token), f)
+# f.close()
+#
+with codecs.open('people_close.json', "r", "utf_8") as f:
+    templates = json.load(f)
+for i in templates:
+    print(i)
