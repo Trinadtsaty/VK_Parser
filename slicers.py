@@ -46,3 +46,4 @@ def apply_slicer(input_path, list_of_groups, slicer = "intersection", output_pat
 
     if output_path:
         filtred.to_json(output_path)
+    return filtred
