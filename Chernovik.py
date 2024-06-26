@@ -116,10 +116,37 @@ group_teg=["Спортивный клуб","Футбол", "Спортивная
 #     templates = json.load(f)
 # a=[]
 # for i in templates:
-#     if i["age"] not in a:
-#         a.append(i["age"])
+#     if i["theme"] not in a:
+#         a.append(i["theme"])
 # print(a)
-with codecs.open('people.json', "r", "utf_8") as f:
-    templates = json.load(f)
-for i in templates:
-    print(i["CITY"])
+# with codecs.open('football_groups.json', "r", "utf_8") as f:
+#     templates = json.load(f)
+# for i in templates:
+#     print(i["theme"])
+
+def zapr_mass(file,zapr):
+    a=[]
+    for item in file:
+        if item[zapr] not in a:
+            a.append(item[zapr])
+    return a
+def open_json(name):
+    with codecs.open(name, "r", "utf_8") as f:
+        templates = json.load(f)
+    return templates
+
+def request_zapros(url):
+    req = requests.get(url)
+    src = req.json()
+    posts = src["response"]["items"]
+    return posts
+
+def serch_close(user_id, group_id, token):
+    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&access_token={token}&v=5.199"
+    people=request_zapros(url_user_from_group)
+    if int(user_id) in people:
+        return True
+    else:
+        return False
+
+print(serch_close("15209","footballpremierleague_hse", token))

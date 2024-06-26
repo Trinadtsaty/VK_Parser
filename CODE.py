@@ -22,7 +22,10 @@ group_teg=["Спортивная команда", "Спортивная орга
 # f = open("football_groups.json", "w")
 # f.close()
 
-
+def open_json(name):
+    with codecs.open(name, "r", "utf_8") as f:
+        templates = json.load(f)
+    return templates
 
 # Проверяем указан ли в дате год рождения, если да, вычисляем сколько лет человеку исполниться или исполнилось в этом году
 def age_read(age):
@@ -42,6 +45,21 @@ def request_zapros(url):
     src = req.json()
     posts = src["response"]["items"]
     return posts
+
+def serch_close(user_id, group_id, token):
+    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&access_token={token}&v=5.199"
+    people=request_zapros(url_user_from_group)
+    if int(user_id) in people:
+        return True
+    else:
+        return False
+
+def zapr_mass(file,zapr):
+    a=[]
+    for item in file:
+        if item[zapr] not in a:
+            a.append(item[zapr])
+    return a
 
 def user_from_group(group_id, count, token,football_teg):
     # Загружаем JSON файл, с пользователями группы
@@ -114,9 +132,8 @@ def user_from_group(group_id, count, token,football_teg):
 # Функция по получению сообществ на которые подписан пользователь
 def group_users(user_id, token, football_teg):
     # копируем содержимое json файла с сообществами на футбольную тематику в массив
-    f = codecs.open("football_groups.json", "r", "utf_8")
-    group_mass=json.load(f)
-    f.close()
+    group_mass=open_json("football_groups.json")
+
     # Создаём массив для записи групп пользователя
     append_js=[]
 
