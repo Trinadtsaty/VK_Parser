@@ -25,32 +25,32 @@ from datetime import datetime
     # print(item["banned"])
 
 
-group_id="bastion_grosstald"
+# group_id=""
 from add_tok import token
 
-def user_from_group(group_id, token):
-    # Загружаем JSON файл, с пользователями группы
-    json_per = []
-    fields = "first_name,last_name"
-    url_user_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&fields={fields}&access_token={token}&v=5.199"
-    req = requests.get(url_user_group)
-    src = req.json()
-    posts = src["response"]["items"]
-    for item in posts:
-        try:
-            first_name=item["first_name"]
-            last_name=item["last_name"]
-            if first_name=="Семён" and last_name=="Ермаков":
-                id = item["id"]
-                link = "https://vk.com/id" + str(id)
-                data=group_users(id, token)
-                json_per.append(
-                    {"ID": id, "LINK": link, "groups":data}
-                )
-        except:
-            continue
-
-    return json_per
+# def user_from_group(group_id, token):
+#     # Загружаем JSON файл, с пользователями группы
+#     json_per = []
+#     fields = "first_name,last_name"
+#     url_user_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&fields={fields}&access_token={token}&v=5.199"
+#     req = requests.get(url_user_group)
+#     src = req.json()
+#     posts = src["response"]["items"]
+#     for item in posts:
+#         try:
+#             first_name=item["first_name"]
+#             last_name=item["last_name"]
+#             if first_name=="Семён" and last_name=="Ермаков":
+#                 id = item["id"]
+#                 link = "https://vk.com/id" + str(id)
+#                 data=group_users(id, token)
+#                 json_per.append(
+#                     {"ID": id, "LINK": link, "groups":data}
+#                 )
+#         except:
+#             continue
+#
+#     return json_per
 
 
 # football_teg=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football"]
@@ -114,5 +114,9 @@ group_teg=["Спортивный клуб","Футбол", "Спортивная
 
 with codecs.open('football_groups.json', "r", "utf_8") as f:
     templates = json.load(f)
+a=[]
 for i in templates:
-    print(i)
+    if i["theme"] not in a:
+        a.append(i["theme"])
+print(a)
+
