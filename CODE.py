@@ -13,7 +13,7 @@ count=100
 fields="sex"
 fields_group="activity"
 extended="1"
-football_teg=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football"]
+football_teg=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
 group_teg=["Спортивная команда", "Спортивная организация", ""]
 
 # Создаём необходимые json файлы для дальнейшей работы с ними
@@ -22,14 +22,34 @@ group_teg=["Спортивная команда", "Спортивная орга
 # f = open("football_groups.json", "w")
 # f.close()
 
+
+
+# Проверяем указан ли в дате год рождения, если да, вычисляем сколько лет человеку исполниться или исполнилось в этом году
+def age_read(age):
+    if (len(age) >= 8) and age != "НЕ УКАЗАНО":
+        age = int(age[len(age) - 4:])
+        data_now = int(str(datetime.now())[:4])
+
+        age = str(data_now - age)
+    else:
+        age = "НЕ УКАЗАНО"
+    return age
+def city(city):
+    pass
+
+def request_zapros(url):
+    req = requests.get(url)
+    src = req.json()
+    posts = src["response"]["items"]
+    return posts
+
 def user_from_group(group_id, count, token,football_teg):
     # Загружаем JSON файл, с пользователями группы
     json_per = []
     fields = "sex,is_closed,city,bdate,deactivated"
-    url_user_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&count={count}&fields={fields}&access_token={token}&v=5.199"
-    req = requests.get(url_user_group)
-    src = req.json()
-    posts = src["response"]["items"]
+    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&count={count}&fields={fields}&access_token={token}&v=5.199"
+
+    posts = request_zapros(url_user_from_group)
 
     # Идёт циклом по каждому пользователю
     for item in posts:
@@ -44,7 +64,7 @@ def user_from_group(group_id, count, token,football_teg):
 
         else:
 
-            # Фильтруем женщин
+            # Фильтруем женщин, 1 - пользователь женщина
             if item["sex"] == 1:
                 continue
 
@@ -68,13 +88,9 @@ def user_from_group(group_id, count, token,football_teg):
                     except:
                         age="НЕ УКАЗАНО"
 
-                    # Проверяем указан ли в дате год рождения, если да, вычисляем сколько лет человеку исполниться или исполнилось в этом году
-                    if (len(age) >= 8) and age!="НЕ УКАЗАНО":
-                        age = int(age[len(age) - 4:])
-                        data_now = int(str(datetime.now())[:4])
-                        age = str(data_now - age)
-                    else:
-                        age="НЕ УКАЗАНО"
+
+                    age=age_read(age)
+
 
                     # Узнаём указанный город
                     try:
@@ -109,13 +125,11 @@ def group_users(user_id, token, football_teg):
     # https: // dev.vk.com / ru / reference / objects / group - документация по фильтрам
     fields_group = "activity,deactivated,description,is_closed"
 
-    url_user_group = f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
+    url_groups_user = f"https://api.vk.com/method/users.getSubscriptions?user_id={user_id}&extended={extended}&fields={fields_group}&access_token={token}&v=5.199"
 
     # У ВК стоит ограничение на 5 запросов в секунду, строчка наобходима чтобы соответсвовать ему
     time.sleep(0.2)
-    req = requests.get(url_user_group)
-    src = req.json()
-    gruops = src["response"]["items"]
+    gruops = request_zapros(url_groups_user)
 
     # Идёт в цикле по всем подпискам пользователя
     for gruop in gruops:

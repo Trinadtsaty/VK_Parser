@@ -112,11 +112,14 @@ group_teg=["Спортивный клуб","Футбол", "Спортивная
 # for i in templates:
 #     print(i)
 
-with codecs.open('football_groups.json', "r", "utf_8") as f:
+# with codecs.open('football_groups.json', "r", "utf_8") as f:
+#     templates = json.load(f)
+# a=[]
+# for i in templates:
+#     if i["age"] not in a:
+#         a.append(i["age"])
+# print(a)
+with codecs.open('people.json', "r", "utf_8") as f:
     templates = json.load(f)
-a=[]
 for i in templates:
-    if i["theme"] not in a:
-        a.append(i["theme"])
-print(a)
-
+    print(i["CITY"])
