@@ -31,14 +31,18 @@ def add_intersection_and_any(input_path, list_of_groups, output_path = ''):
 
     return players_with_groups
 
-def apply_slicer(data, slicer = "intersection"): #slicer in ("intersection", "any")
+def apply_slicer(input_path, list_of_groups, slicer = "intersection", output_path = ''): #slicer in ("intersection", "any")
+
+    assert slicer in ['intersection', 'any'], "не правильный слайсер, криворукая ты рожа"
+
+    data = add_intersection_and_any(input_path, list_of_groups)
      
     if slicer == "intersection":
-        return data[data["intersection"] == True]
+        filtred =  data[data["intersection"] == True]
      
     if slicer == "any":
-        return data[data["is_in_any"] == True] 
+        filtred =  data[data["is_in_any"] == True] 
+    
 
-    else: 
-        return None 
-
+    if output_path:
+        filtred.to_json(output_path)
