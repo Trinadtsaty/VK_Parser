@@ -172,10 +172,10 @@ def filter_group_keyword(gruops, football_keyword):
 
 
 def user_from_group(group_id, token, ban_city, fields, filtre_age):
-    json_open = []
-    json_close = []
-    j = 0
-    k=0
+    json_open = open_json("people_open.json")
+    json_close = open_json("people_close.json")
+    # j = 0
+    # k=0
 
     posts = glue_mass_people(fields, group_id, token)
     posts=filter_banned(posts)
@@ -189,16 +189,28 @@ def user_from_group(group_id, token, ban_city, fields, filtre_age):
         link="https://vk.com/id" + str(id_a)
         city=item["city"]
         age=item["age"]
-        j+=1
-        js_a={"NUMBER":j,"ID": id_a, "LINK": link, "CITY": city, "AGE": age}
-        json_open.append(js_a)
+        # j+=1
+        # js_a={"NUMBER":j,"ID": id_a, "LINK": link, "CITY": city, "AGE": age}
+        js_a = { "ID": id_a, "LINK": link, "CITY": city, "AGE": age, "REPEAT": "ONE"}
+        if js_a not in json_open:
+            json_open.append(js_a)
 
     for item in close_posts:
         id_a = item["id"]
         link = "https://vk.com/id" + str(id_a)
-        k+=1
-        js_a = {"NUMBER":k,"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
-        json_close.append(js_a)
+
+        # k+=1
+        # js_a = {"NUMBER":k,"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
+        js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN", "REPEAT": "ONE"}
+        if js_a not in json_close:
+            json_close.append(js_a)
+
+    f = codecs.open("people_open.json", "w", "utf_8")
+    json.dump(json_open, f)
+    f.close()
+    f = codecs.open("people_close.json", "w", "utf_8")
+    json.dump(json_close, f)
+    f.close()
 
     return json_open, json_close
 
@@ -232,11 +244,13 @@ def groups_users(user_id, token, football_keyword, ban_activity):
 
 def people_plus_groups(name, token, football_keyword, ban_activity):
     people=open_json(name)
+    j=0
     for item in people:
+        j+=1
         test=item.get("GROUPS", "NaN")
         if test=="NaN":
             try:
-                print("NUMBER=", item["NUMBER"])
+                print("NUMBER=", j)
                 user_id = item["ID"]
                 js_a=groups_users(user_id, token, football_keyword, ban_activity)
                 item["GROUPS"] = js_a
@@ -265,14 +279,13 @@ ban_activity=""
 name="people_open_with_groups.json"
 
 
-
+# Собираем всех пользователей сообщества
 # js_open, js_close = user_from_group(group_id, token, ban_city, fields, filtre_age)
-
-
+# Люди с открытм профилем
 # f = codecs.open("people_open.json", "w", "utf_8")
 # json.dump(js_open, f)
 # f.close()
-#
+#люди с закрытым профилем
 # f = codecs.open("people_close.json", "w", "utf_8")
 # json.dump(js_close, f)
 # f.close()
@@ -284,6 +297,7 @@ name="people_open_with_groups.json"
 # json.dump(js_gr, f)
 # f.close()
 
+# Запуск "people_plus_groups" с игнорированием ошибок (запускать до тех пор, пока не сделает полностью)
 # for i in range(100):
 #     print("i=", i)
 #     js_gr = people_plus_groups(name, token, football_keyword, ban_activity)
@@ -294,5 +308,3 @@ name="people_open_with_groups.json"
 
 
 
-
-see_JSON("football_groups.json")
