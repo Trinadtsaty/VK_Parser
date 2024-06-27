@@ -253,6 +253,11 @@ def see_JSON(name):
         print(i)
 
 
+def run_parser():
+    # напиши здесь функцию, которая принимая агрументы запускает парсeр и записывает результаты в JSON
+    print("я родился")
+    pass
+
 
 fields_group = "activity,deactivated,description,is_closed"
 group_id="footballpremierleague_hse"

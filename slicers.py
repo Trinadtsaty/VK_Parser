@@ -46,3 +46,14 @@ def apply_slicer(input_path, list_of_groups, slicer = "intersection", output_pat
 
     if output_path:
         filtred.to_json(output_path)
+
+    return filtred
+
+
+def new_into_data(old, new, id_field = "ID"):
+    #принимает 2 датафрейма в одном формате (страый и новый), выдаёт 
+    # выдаёт датафрем из тех, кого не было в страм, но тех, кто есть в новов
+    old_ids = set(old[id_field].values())
+    new_into = new[~new[id_field].isin(old_ids)]
+    return new_into
+
