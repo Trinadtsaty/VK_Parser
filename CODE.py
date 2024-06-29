@@ -251,7 +251,7 @@ def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_k
     n=len(json_open)
     time.sleep(5)
     print(n)
-    for i in range(n//10):
+    for i in range(n//8):
         print("i=", i)
         js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
         f = codecs.open(f"{name_j}.json", "w", "utf_8")
