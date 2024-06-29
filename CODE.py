@@ -173,7 +173,10 @@ def filter_group_keyword(gruops, football_keyword):
 
 def user_from_group(group_id, token, ban_city, fields, filtre_age):
     json_open = open_json("people_open.json")
-    json_close = open_json("people_close.json")
+    mass_id=[]
+    for item in json_open:
+        mass_id.append(item["ID"])
+
 
     posts = glue_mass_people(fields, group_id, token)
     posts=filter_banned(posts)
@@ -187,30 +190,15 @@ def user_from_group(group_id, token, ban_city, fields, filtre_age):
         link="https://vk.com/id" + str(id_a)
         city=item["city"]
         age=item["age"]
-        # j+=1
-        # js_a={"NUMBER":j,"ID": id_a, "LINK": link, "CITY": city, "AGE": age}
         js_a = { "ID": id_a, "LINK": link, "CITY": city, "AGE": age, "REPEAT": "ONE"}
-        if js_a not in json_open:
+        if js_a["ID"] not in mass_id:
             json_open.append(js_a)
-
-    for item in close_posts:
-        id_a = item["id"]
-        link = "https://vk.com/id" + str(id_a)
-
-        # k+=1
-        # js_a = {"NUMBER":k,"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
-        js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN", "REPEAT": "ONE"}
-        if js_a not in json_close:
-            json_close.append(js_a)
 
     f = codecs.open("people_open.json", "w", "utf_8")
     json.dump(json_open, f)
     f.close()
-    f = codecs.open("people_close.json", "w", "utf_8")
-    json.dump(json_close, f)
-    f.close()
 
-    return json_open, json_close
+    return json_open
 
 def groups_users(user_id, token, football_keyword, ban_activity):
     group_mass = open_json("football_groups.json")
@@ -251,6 +239,7 @@ def people_plus_groups(token, football_keyword, ban_activity):
             try:
                 user_id = item["ID"]
                 js_a=groups_users(user_id, token, football_keyword, ban_activity)
+
                 item["GROUPS"] = js_a
             except:
                 print("error, restart")
@@ -283,6 +272,8 @@ def run_parser(group_id, token, ban_city, fields, filtre_age, football_keyword, 
         json.dump(js_gr, f)
         f.close()
     print("всё")
+
+
 
 
 fields_group = "activity,deactivated,description,is_closed"
