@@ -18,14 +18,14 @@ async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE, messa
     # else:
     #     await update.message.reply_text("Пожалуйста, предоставьте сообщение для отправки.")
 
-def run_tg_bot():
+def run_tg_bot(message = ""):
     # Вставьте ваш токен бота здесь
     token = tokens['telegram_token']
     # Создание экземпляра приложения
     application = ApplicationBuilder().token(token).build()
     
     # Добавление обработчика команды /send
-    application.add_handler(CommandHandler('send', send_message))
+    application.add_handler(CommandHandler('send', send_message(message=message)))
 
     # Запуск polling
     logger.info("Запуск бота...")
