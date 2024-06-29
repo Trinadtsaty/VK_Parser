@@ -163,6 +163,7 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
     mass_id=[]
     for item in json_open:
         mass_id.append(item["ID"])
+    print(mass_id)
 
 
     posts = glue_mass_people(fields, group_id, token)
@@ -181,9 +182,10 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
         if js_a["ID"] not in mass_id:
             json_open.append(js_a)
 
-    f = codecs.open(f"{name_j}.json", "w", "utf_8")
-    json.dump(json_open, f)
-    f.close()
+    safe_json(name_j,json_open)
+    # f = codecs.open(f"{name_j}.json", "w", "utf_8")
+    # json.dump(json_open, f)
+    # f.close()
 
     return json_open
 
@@ -210,7 +212,7 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     json.dump(group_mass, f)
     f.close()
     return append_js
-    # time.sleep(0.2)
+
 
 
 
@@ -254,9 +256,10 @@ def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_k
     for i in range(n//8):
         print("i=", i)
         js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
-        f = codecs.open(f"{name_j}.json", "w", "utf_8")
-        json.dump(js_gr, f)
-        f.close()
+        safe_json(name_j,js_gr)
+        # f = codecs.open(f"{name_j}.json", "w", "utf_8")
+        # json.dump(js_gr, f)
+        # f.close()
     print("всё")
     json_open = open_json(f"{name_j}.json")
     return json_open
@@ -271,19 +274,23 @@ def data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword
     if not os.path.isdir("DB"):
         os.mkdir("DB")
     day = "DB/" + date.today().strftime("%d_%m_%Y")
-    a=[]
-    safe_json(day,a)
+    if not os.path.isfile(f"{day}.json"):
+        a=[]
+        safe_json(day,a)
+
     new_json=run_parser(day, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
     index_json=open_json("people_open.json")
     new_people=[]
     index_json_id = []
+
     for item in index_json:
         index_json_id.append(item["ID"])
     for item in new_json:
         if item["ID"] not in index_json_id:
             new_people.append(item)
+            index_json.append(item)
 
-    safe_json("people_open.json",new_json)
+    safe_json("people_open",index_json)
     return new_people
 
 
@@ -293,8 +300,8 @@ def data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword
 
 # name="people_open"
 fields_group = "activity,deactivated,description,is_closed"
-group_id="footballpremierleague_hse"
-# group_id="222824253"
+# group_id="footballpremierleague_hse"
+group_id="222824253"
 fields = "sex,is_closed,city,bdate,deactivated"
 ban_city=["Санкт-Петербург"]
 football_keyword=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
