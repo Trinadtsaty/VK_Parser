@@ -6,9 +6,11 @@ import numpy as np
 import datetime
 from datetime import datetime
 
-with codecs.open('people_123.json', "r", "utf_8") as f:
+with codecs.open('people_open.json', "r", "utf_8") as f:
     templates = json.load(f)
+    j=0
 for i in templates:
-    print(i)
+    j+=1
+    print(j, i)
 
 

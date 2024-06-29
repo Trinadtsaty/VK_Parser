@@ -29,7 +29,7 @@ def request_zapros(url):
     req = requests.get(url)
     src = req.json()
     posts = src["response"]["items"]
-    # time.sleep(0.2)
+    time.sleep(0.2)
     return posts
 
 def serch_close(user_id, group_id, token):
@@ -174,8 +174,6 @@ def filter_group_keyword(gruops, football_keyword):
 def user_from_group(group_id, token, ban_city, fields, filtre_age):
     json_open = open_json("people_open.json")
     json_close = open_json("people_close.json")
-    # j = 0
-    # k=0
 
     posts = glue_mass_people(fields, group_id, token)
     posts=filter_banned(posts)
@@ -242,19 +240,20 @@ def groups_users(user_id, token, football_keyword, ban_activity):
 
 
 
-def people_plus_groups(name, token, football_keyword, ban_activity):
-    people=open_json(name)
+def people_plus_groups(token, football_keyword, ban_activity):
+    people=open_json("people_open.json")
     j=0
     for item in people:
         j+=1
+        print("number=",j)
         test=item.get("GROUPS", "NaN")
         if test=="NaN":
             try:
-                print("NUMBER=", j)
                 user_id = item["ID"]
                 js_a=groups_users(user_id, token, football_keyword, ban_activity)
                 item["GROUPS"] = js_a
             except:
+                print("error, restart")
                 break
     return people
 
@@ -266,6 +265,24 @@ def see_JSON(name):
     for i in templates:
         print(i)
 
+
+def run_parser(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity):
+    # напиши здесь функцию, которая принимая агрументы запускает парсeр и записывает результаты в JSON
+    try:
+        user_from_group(group_id, token, ban_city, fields, filtre_age)
+    except:
+        print("Не удалось получить информацию о пользователях")
+    json_open = open_json("people_open.json")
+    n=len(json_open)
+    time.sleep(5)
+    print(n)
+    for i in range(n//2):
+        print("i=", i)
+        js_gr = people_plus_groups(token, football_keyword, ban_activity)
+        f = codecs.open("people_open.json", "w", "utf_8")
+        json.dump(js_gr, f)
+        f.close()
+    print("всё")
 
 
 fields_group = "activity,deactivated,description,is_closed"
@@ -279,32 +296,5 @@ ban_activity=""
 name="people_open_with_groups.json"
 
 
-# Собираем всех пользователей сообщества
-# js_open, js_close = user_from_group(group_id, token, ban_city, fields, filtre_age)
-# Люди с открытм профилем
-# f = codecs.open("people_open.json", "w", "utf_8")
-# json.dump(js_open, f)
-# f.close()
-#люди с закрытым профилем
-# f = codecs.open("people_close.json", "w", "utf_8")
-# json.dump(js_close, f)
-# f.close()
 
-
-# js_gr = people_plus_groups(name, token, football_keyword, ban_activity)
-#
-# f = codecs.open("people_open_with_groups.json", "w", "utf_8")
-# json.dump(js_gr, f)
-# f.close()
-
-# Запуск "people_plus_groups" с игнорированием ошибок (запускать до тех пор, пока не сделает полностью)
-# for i in range(100):
-#     print("i=", i)
-#     js_gr = people_plus_groups(name, token, football_keyword, ban_activity)
-#     f = codecs.open("people_open_with_groups.json", "w", "utf_8")
-#     json.dump(js_gr, f)
-#     f.close()
-
-
-
-
+run_parser(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity)
