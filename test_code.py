@@ -271,8 +271,8 @@ def data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword
     if not os.path.isfile("people_open.json"):
         a = []
         safe_json("people_open", a)
-
-    index_json=open_json("people_open.json")
+    else:
+        index_json=open_json("people_open.json")
     new_people=[]
     index_json_id = []
 
