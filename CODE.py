@@ -2,10 +2,11 @@ import requests
 from add_tok import token
 import codecs
 import json
-import datetime
+# import datetime
 from datetime import date
 import time
 import numpy as np
+import os
 
 
 
@@ -32,20 +33,6 @@ def request_zapros(url):
     time.sleep(0.2)
     return posts
 
-def serch_close(user_id, group_id, token):
-    url_user_from_group=f"https://api.vk.com/method/groups.getMembers?group_id={group_id}&access_token={token}&v=5.199"
-    people=request_zapros(url_user_from_group)
-    if int(user_id) in people:
-        return True
-    else:
-        return False
-
-def zapr_mass(file,zapr):
-    a=[]
-    for item in file:
-        if item[zapr] not in a:
-            a.append(item[zapr])
-    return a
 
 def glue_mass_people(fields,group_id,token):
     offset =0
@@ -70,7 +57,6 @@ def filter_banned(posts):
 
 def filter_sex(posts):
     mass=[]
-    g=0
     for item in posts:
         if item["sex"] == 2:
             mass.append(item)
@@ -86,6 +72,7 @@ def filter_close(posts):
         else:
             open.append(item)
     return open, close
+
 def filter_city(posts,ban_city):
     mass=[]
     for item in posts:
@@ -171,8 +158,8 @@ def filter_group_keyword(gruops, football_keyword):
     return mass
 
 
-def user_from_group(group_id, token, ban_city, fields, filtre_age):
-    json_open = open_json("people_open.json")
+def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
+    json_open = open_json(f"{name_j}.json")
     mass_id=[]
     for item in json_open:
         mass_id.append(item["ID"])
@@ -194,13 +181,13 @@ def user_from_group(group_id, token, ban_city, fields, filtre_age):
         if js_a["ID"] not in mass_id:
             json_open.append(js_a)
 
-    f = codecs.open("people_open.json", "w", "utf_8")
+    f = codecs.open(f"{name_j}.json", "w", "utf_8")
     json.dump(json_open, f)
     f.close()
 
     return json_open
 
-def groups_users(user_id, token, football_keyword, ban_activity):
+def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     group_mass = open_json("football_groups.json")
     append_js = []
 
@@ -228,8 +215,8 @@ def groups_users(user_id, token, football_keyword, ban_activity):
 
 
 
-def people_plus_groups(token, football_keyword, ban_activity):
-    people=open_json("people_open.json")
+def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group):
+    people=open_json(f"{name_j}.json")
     j=0
     for item in people:
         j+=1
@@ -238,7 +225,7 @@ def people_plus_groups(token, football_keyword, ban_activity):
         if test=="NaN":
             try:
                 user_id = item["ID"]
-                js_a=groups_users(user_id, token, football_keyword, ban_activity)
+                js_a=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
                 item["GROUPS"] = js_a
             except:
@@ -248,44 +235,79 @@ def people_plus_groups(token, football_keyword, ban_activity):
 
 
 
-def see_JSON(name):
-    with codecs.open(name, "r", "utf_8") as f:
-        templates = json.load(f)
-    for i in templates:
-        print(i)
+# def see_JSON(name):
+#     with codecs.open(name, "r", "utf_8") as f:
+#         templates = json.load(f)
+#     for i in templates:
+#         print(i)
 
 
-def run_parser(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity):
-    # напиши здесь функцию, которая принимая агрументы запускает парсeр и записывает результаты в JSON
+def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
     try:
-        user_from_group(group_id, token, ban_city, fields, filtre_age)
+        user_from_group(name_j, group_id, token, ban_city, fields, filtre_age)
     except:
         print("Не удалось получить информацию о пользователях")
-    json_open = open_json("people_open.json")
+    json_open = open_json(f"{name_j}.json")
     n=len(json_open)
     time.sleep(5)
     print(n)
-    for i in range(n//2):
+    for i in range(n//10):
         print("i=", i)
-        js_gr = people_plus_groups(token, football_keyword, ban_activity)
-        f = codecs.open("people_open.json", "w", "utf_8")
+        js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
+        f = codecs.open(f"{name_j}.json", "w", "utf_8")
         json.dump(js_gr, f)
         f.close()
     print("всё")
+    json_open = open_json(f"{name_j}.json")
+    return json_open
+
+def safe_json(name_js,file):
+    f = codecs.open(f"{name_js}.json", "w", "utf_8")
+    json.dump(file, f)
+    f.close()
+
+
+def data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
+    if not os.path.isdir("DB"):
+        os.mkdir("DB")
+    day = "DB/" + date.today().strftime("%d_%m_%Y")
+    a=[]
+    safe_json(day,a)
+    new_json=run_parser(day, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
+    index_json=open_json("people_open.json")
+    new_people=[]
+    index_json_id = []
+    for item in index_json:
+        index_json_id.append(item["ID"])
+    for item in new_json:
+        if item["ID"] not in index_json_id:
+            new_people.append(item)
+
+    safe_json("people_open.json",new_json)
+    return new_people
 
 
 
 
+
+
+# name="people_open"
 fields_group = "activity,deactivated,description,is_closed"
 group_id="footballpremierleague_hse"
+# group_id="222824253"
 fields = "sex,is_closed,city,bdate,deactivated"
 ban_city=["Санкт-Петербург"]
 football_keyword=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
 group_teg=["Спортивная команда", "Спортивная организация", ""]
 filtre_age=1000000
 ban_activity=""
-name="people_open_with_groups.json"
+# name="people_open_with_groups.json"
 
 
 
-run_parser(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity)
+templates=data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
+j=0
+for i in templates:
+    j+=1
+    print(j, i)
+
