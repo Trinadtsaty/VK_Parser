@@ -2,7 +2,6 @@ import requests
 from add_tok import token
 import codecs
 import json
-# import datetime
 from datetime import date
 import time
 import numpy as np
@@ -11,11 +10,6 @@ import os
 
 
 
-# Создаём необходимые json файлы для дальнейшей работы с ними
-# f = open("people.json", "w")
-# f.close()
-# f = open("football_groups.json", "w")
-# f.close()
 
 def open_json(name):
     with codecs.open(name, "r", "utf_8") as f:
@@ -183,9 +177,7 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
             json_open.append(js_a)
 
     safe_json(name_j,json_open)
-    # f = codecs.open(f"{name_j}.json", "w", "utf_8")
-    # json.dump(json_open, f)
-    # f.close()
+
 
     return json_open
 
@@ -230,18 +222,17 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
                 js_a=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
                 item["GROUPS"] = js_a
+
             except:
                 print("error, restart")
+
                 break
+
+
     return people
 
 
 
-# def see_JSON(name):
-#     with codecs.open(name, "r", "utf_8") as f:
-#         templates = json.load(f)
-#     for i in templates:
-#         print(i)
 
 
 def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
@@ -250,16 +241,15 @@ def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_k
     except:
         print("Не удалось получить информацию о пользователях")
     json_open = open_json(f"{name_j}.json")
+
     n=len(json_open)
-    time.sleep(5)
     print(n)
+    time.sleep(5)
+
     for i in range(n//8):
         print("i=", i)
         js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
         safe_json(name_j,js_gr)
-        # f = codecs.open(f"{name_j}.json", "w", "utf_8")
-        # json.dump(js_gr, f)
-        # f.close()
     print("всё")
     json_open = open_json(f"{name_j}.json")
     return json_open
