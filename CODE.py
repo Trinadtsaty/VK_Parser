@@ -259,7 +259,16 @@ def safe_json(name_js,file):
     f.close()
 
 
-def data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
+def data_parsing(group_id, token):
+
+    fields_group = "activity,deactivated,description,is_closed"
+    group_id = "footballpremierleague_hse"
+    fields = "sex,is_closed,city,bdate,deactivated"
+    ban_city = ["Санкт-Петербург"]
+    football_keyword = ["Football", "Футбол", "Football", "ФУТБОЛ", "FOOTBALL", "футбол", "football", "ФК", "фк"]
+    filtre_age = 1000000
+    ban_activity = ""
+
     if not os.path.isdir("DB"):
         os.mkdir("DB")
     day = "DB/" + date.today().strftime("%d_%m_%Y")
@@ -305,7 +314,7 @@ ban_activity=""
 
 
 
-templates=data_parsing(group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
+templates=data_parsing(group_id, token)
 j=0
 for i in templates:
     j+=1
