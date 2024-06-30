@@ -6,7 +6,7 @@ from datetime import date
 import time
 import numpy as np
 import os
-
+from Config import find_params
 
 
 
@@ -259,15 +259,15 @@ def safe_json(name_js,file):
     f.close()
 
 
-def data_parsing(group_id, token):
+def data_parsing(group_id, token, find_params):
 
-    fields_group = "activity,deactivated,description,is_closed"
-    group_id = "footballpremierleague_hse"
-    fields = "sex,is_closed,city,bdate,deactivated"
-    ban_city = ["Санкт-Петербург"]
-    football_keyword = ["Football", "Футбол", "Football", "ФУТБОЛ", "FOOTBALL", "футбол", "football", "ФК", "фк"]
-    filtre_age = 1000000
-    ban_activity = ""
+    fields_group = find_params["fields_group"]
+    group_id = find_params["group_id"]
+    fields = find_params["fields"]
+    ban_city = find_params["ban_city"]
+    football_keyword = find_params["football_keyword"]
+    filtre_age = find_params["filtre_age"]
+    ban_activity = find_params["ban_activity"]
 
     if not os.path.isdir("DB"):
         os.mkdir("DB")

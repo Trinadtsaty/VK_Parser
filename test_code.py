@@ -1,5 +1,4 @@
 import telebot
-from Config import tokens
 from CODE import data_parsing
 from add_tok import token
 from add_tok import token_TG
@@ -15,7 +14,7 @@ bot = telebot.TeleBot(token_TG)
 def send_help(message, token_VK):
     group_id=message.text[6:]
     try:
-        data_parsing(group_id, token)
+        new_people=data_parsing(group_id, token)
     except:
         bot.send_message(message.chat.id, message.text[5:] + "Не верный ID группы")
 
