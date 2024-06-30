@@ -31,6 +31,7 @@ def add_intersection_and_any(input_path, list_of_groups, output_path = ''):
 
     return players_with_groups
 
+
 def apply_slicer(input_path, list_of_groups, slicer = "intersection", output_path = ''): #slicer in ("intersection", "any")
 
     assert slicer in ['intersection', 'any'], "не правильный слайсер, криворукая ты рожа"
