@@ -2,8 +2,8 @@ import telebot
 from Config import tokens
 from CODE import data_parsing
 from add_tok import token
-import pandas as pd 
 from add_tok import token_TG
+import pandas as pd 
 
 # token = tokens['telegram_token']
 token1="5308900440:AAFsI35w_esbY_RgtGmUf3fTbFLUTBphGgk"
