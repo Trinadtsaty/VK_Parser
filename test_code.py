@@ -2,12 +2,17 @@ import telebot
 from Config import tokens
 from CODE import data_parsing
 from add_tok import token
+from add_tok import token_TG
 # token = tokens['telegram_token']
-token1="5308900440:AAFsI35w_esbY_RgtGmUf3fTbFLUTBphGgk"
-bot = telebot.TeleBot(token1)
+
+
+
+token_VK=token
+bot = telebot.TeleBot(token_TG)
+
 
 @bot.message_handler(commands=["start"])
-def send_help(message, token):
+def send_help(message, token_VK):
     group_id=message.text[6:]
     try:
         data_parsing(group_id, token)
