@@ -188,12 +188,22 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
 def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     group_mass = open_json("football_groups.json")
     append_js = []
+    all_groups=[]
 
     gruops = glue_mass_group(user_id, token, fields_group)
+    gr_all=gruops
     gruops = filter_gruops_deactivated(gruops)
     gruops = filter_groups_page(gruops)
     gruops = filter_group_activity(gruops, ban_activity)
     gruops = filter_group_keyword(gruops, football_keyword)
+    for gruop in gr_all:
+        id_a = gruop["id"]
+        link = "https://vk.com/public" + str(id_a)
+        name = gruop["name"]
+        theme = gruop["activity"]
+        data = {"ID": id_a, "LINK": link, "NAME": name, "theme": theme}
+        all_groups.append(data)
+
 
     for gruop in gruops:
         id_a=gruop["id"]
@@ -207,7 +217,7 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     f = codecs.open("football_groups.json", "w", "utf_8")
     json.dump(group_mass, f)
     f.close()
-    return append_js
+    return append_js, all_groups
 
 
 
@@ -223,9 +233,10 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
         if test=="NaN":
             try:
                 user_id = item["ID"]
-                js_a=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
+                js_a, js_gall=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
                 item["GROUPS"] = js_a
+                item["ALL_GROUPS"] = js_gall
 
             except:
                 print("error, restart")
