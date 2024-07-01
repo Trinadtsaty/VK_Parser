@@ -61,7 +61,22 @@ def parse_data(message):
 
 @bot.message_handler(commands=["get_data"])
 def get_data(message):
-    new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
+
+    message_a = message.text[9:].split()
+    file_name="_"
+    for item in message_a:
+        if "file_name=" in item:
+            file_name = item[10:]
+            print(item)
+
+    print(file_name)
+    if file_name=="_":
+        new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
+        print(new_file)
+    else:
+        new_file = "DB/" + file_name + ".json"
+        print(new_file)
+
     if not os.path.isfile(new_file):
         bot.send_message(message.chat.id, "Данного файла не существует")
 
@@ -69,10 +84,19 @@ def get_data(message):
         data = pd.read_json(new_file)
         data = data[data['GROUPS'].apply(len) > 0]
 
-        for i in range(5):
+        if len(data)>=5:
+            n=5
+        else:
+            n=len(data)
+
+        print(n)
+        for i in range(n):
             slice=data.iloc[i]
+            fields=["ID","LINK","AGE","CITY"]
+            slice=slice[fields]
             slice_str = slice.to_string()
-            bot.send_message(message.chat.id, slice_str)
+            print(slice_str)
+            bot.send_message(message.chat.id, slice_str, disable_web_page_preview=True)
         # slice = data[:5]
         #
         # slice_str = slice.to_string()
@@ -87,7 +111,7 @@ def send(message):
     bot.send_message(message.chat.id, "<b>Любые действия с кодом занимают определённое время, бот уведомит вас по завершении работы</b>", parse_mode="html")
     bot.send_message(message.chat.id, "/dop_search + ID группы - программа пропарсит группу и выдаст новых её членов.\nМожно вводить  несколько групп, через пробелы.\nПри вводе во время запроса 'file_name=*название файла, без пробелов*' программа сохранит результаты работы в отдельный json файл")
     bot.send_message(message.chat.id, "/start  - программа пропарсит заранее сохранённые группы, это займет какое-то время, ждите")
-    bot.send_message(message.chat.id, "/get_data - программа выведит людей")
+    bot.send_message(message.chat.id, "/get_data - программа выведит людей.\nЕсли дополнительно передать аргумент 'file_name=*название файла, без пробелов*' тогда программа, выдаст людей из нужного json файла")
     bot.send_message(message.chat.id, "/all_file - программа выдаёт название всех ранее сохранённых файлов")
 
 @bot.message_handler(commands=["all_file"])
