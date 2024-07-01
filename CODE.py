@@ -193,7 +193,9 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     gruops = glue_mass_group(user_id, token, fields_group)
     gr_all=gruops
     gruops = filter_gruops_deactivated(gruops)
+    gr_all = filter_gruops_deactivated(gr_all)
     gruops = filter_groups_page(gruops)
+    gr_all = filter_groups_page(gr_all)
     gruops = filter_group_activity(gruops, ban_activity)
     gruops = filter_group_keyword(gruops, football_keyword)
     for gruop in gr_all:
@@ -237,12 +239,9 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
 
                 item["GROUPS"] = js_a
                 item["ALL_GROUPS"] = js_gall
-
             except:
                 print("error, restart")
-
                 break
-
 
     return people
 

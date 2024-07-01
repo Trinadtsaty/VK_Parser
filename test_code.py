@@ -45,15 +45,16 @@ def dop_search(message):
 
 @bot.message_handler(commands=["start"])
 def parse_data(message):
+    file_name='_'
     group_mass=find_params["group_mass"]
     print(group_mass)
     token_VK = token
     for group in group_mass:
         print(group)
         bot.send_message(message.chat.id, group)
-        time.sleep(4)
+        time.sleep(2)
         try:
-            data_parsing(group, token_VK, find_params)
+            data_parsing(message, file_name, group, token_VK, find_params)
         except:
             bot.send_message(message.chat.id, "Ошибка в работе Бота")
     time.sleep(0.5)
@@ -71,7 +72,8 @@ def get_data(message):
 
     print(file_name)
     if file_name=="_":
-        new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
+        # new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
+        new_file='people_open.json'
         print(new_file)
     else:
         new_file = "DB/" + file_name + ".json"
