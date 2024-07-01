@@ -33,9 +33,10 @@ def dop_search(message):
 
     for item in group_id:
         if "file_name=" not  in item:
-            bot.send_message(message.chat.id, item)
+            bot.send_message(message.chat.id, "парсинг группы "+item)
+
             print(item)
-            time.sleep(4)
+            time.sleep(2)
             try:
                 data_parsing(message, file_name, item, token_VK, find_params)
             except:
@@ -51,7 +52,7 @@ def parse_data(message):
     token_VK = token
     for group in group_mass:
         print(group)
-        bot.send_message(message.chat.id, group)
+        bot.send_message(message.chat.id, "парсинг группы "+group)
         time.sleep(2)
         try:
             data_parsing(message, file_name, group, token_VK, find_params)
@@ -73,7 +74,7 @@ def get_data(message):
     print(file_name)
     if file_name=="_":
         # new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
-        new_file='people_open.json'
+        new_file= '../people_open.json'
         print(new_file)
     else:
         new_file = "DB/" + file_name + ".json"
@@ -119,8 +120,8 @@ def send(message):
 @bot.message_handler(commands=["all_file"])
 def all_file(message):
 
-    if os.path.isdir("DB"):
-        file=os.listdir("DB")
+    if os.path.isdir("../DB"):
+        file=os.listdir("../DB")
         if file==[]:
             bot.send_message(message.chat.id, "Файлы отсутсвуют")
         else:

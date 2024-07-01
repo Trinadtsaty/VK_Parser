@@ -11,6 +11,6 @@ find_params = {
     "football_keyword" : ["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"],
     "filtre_age" : 1000000,
     "ban_activity" : "",
-    "group_mass" : ["bastion_grosstald", "222824253","fdjh","footballpremierleague_hse"]
+    "group_mass" : ["222824253","footballpremierleague_hse"]
 }
 
