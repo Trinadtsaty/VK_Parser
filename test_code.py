@@ -15,8 +15,8 @@ import os
 # token_VK = token
 #
 # find_params=find_params
-
-token_TG="5308900440:AAFsI35w_esbY_RgtGmUf3fTbFLUTBphGgk"
+# token_TG="7380972075:AAEojzb18qqBOo2PFCLXbzAistjcixpeWIc"
+# token_TG="5308900440:AAFsI35w_esbY_RgtGmUf3fTbFLUTBphGgk"
 
 
 bot = telebot.TeleBot(token_TG)
@@ -26,15 +26,22 @@ def dop_search(message):
     token_VK = token
     group_id=message.text[11:].split()
     print(group_id)
+    file_name="_"
+    for item in group_id:
+        if "file_name=" in item:
+            file_name=item[10:]
 
     for item in group_id:
-        bot.send_message(message.chat.id, item)
-        print(item)
-        time.sleep(4)
-        try:
-            data_parsing(item, token_VK, find_params)
-        except:
-            print("Не удалось получить информацию о пользователях")
+        if "file_name=" not  in item:
+            bot.send_message(message.chat.id, item)
+            print(item)
+            time.sleep(4)
+            try:
+                data_parsing(message, file_name, item, token_VK, find_params)
+            except:
+                bot.send_message(message.chat.id, "Ошибка в работе Бота")
+    time.sleep(0.5)
+    bot.send_message(message.chat.id, "Команда /dop_search завершила работу")
 
 @bot.message_handler(commands=["start"])
 def parse_data(message):
@@ -48,13 +55,15 @@ def parse_data(message):
         try:
             data_parsing(group, token_VK, find_params)
         except:
-            bot.send_message(message.chat.id, message.text[6:] + " Не верный ID группы")
+            bot.send_message(message.chat.id, "Ошибка в работе Бота")
+    time.sleep(0.5)
+    bot.send_message(message.chat.id, "Команда /start завершила работу")
 
 @bot.message_handler(commands=["get_data"])
 def get_data(message):
     new_file = "DB/" + date.today().strftime("%d_%m_%Y") + ".json"
     if not os.path.isfile(new_file):
-        bot.send_message(message.chat.id, "Нет данных за сегодня")
+        bot.send_message(message.chat.id, "Данного файла не существует")
 
     else:
         data = pd.read_json(new_file)
@@ -68,19 +77,40 @@ def get_data(message):
         #
         # slice_str = slice.to_string()
         # bot.send_message(message.chat.id, slice_str)
+    time.sleep(0.5)
+    bot.send_message(message.chat.id, "Команда /get_data завершила работу")
 
 
 
 @bot.message_handler(commands=["help"])
 def send(message):
-    bot.send_message(message.chat.id, "/dop_search + ID группы - программа пропарсит группу и выдаст новых её членов \n можно вводить  несколько групп, через пробелы")
+    bot.send_message(message.chat.id, "<b>Любые действия с кодом занимают определённое время, бот уведомит вас по завершении работы</b>", parse_mode="html")
+    bot.send_message(message.chat.id, "/dop_search + ID группы - программа пропарсит группу и выдаст новых её членов.\nМожно вводить  несколько групп, через пробелы.\nПри вводе во время запроса 'file_name=*название файла, без пробелов*' программа сохранит результаты работы в отдельный json файл")
     bot.send_message(message.chat.id, "/start  - программа пропарсит заранее сохранённые группы, это займет какое-то время, ждите")
     bot.send_message(message.chat.id, "/get_data - программа выведит людей")
+    bot.send_message(message.chat.id, "/all_file - программа выдаёт название всех ранее сохранённых файлов")
 
+@bot.message_handler(commands=["all_file"])
+def all_file(message):
+
+    if os.path.isdir("DB"):
+        file=os.listdir("DB")
+        if file==[]:
+            bot.send_message(message.chat.id, "Файлы отсутсвуют")
+        else:
+            for item in file:
+                bot.send_message(message.chat.id, item)
+    else:
+        bot.send_message(message.chat.id, "Файлы отсутсвуют")
+    time.sleep(0.5)
+    bot.send_message(message.chat.id, "Команда /all_file завершила работу")
 
 @bot.message_handler()
 def info(message):
+
     bot.send_message(message.chat.id, "/help - для получения информации о работе бота")
+
+
 
 
 bot.polling(none_stop=True)

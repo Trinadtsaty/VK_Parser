@@ -1,4 +1,5 @@
 import requests
+import telebot
 from add_tok import token
 import codecs
 import json
@@ -6,9 +7,13 @@ from datetime import date
 import time
 import numpy as np
 import os
+from add_tok import token_TG
 from Config import find_params
 
 
+
+
+bot = telebot.TeleBot(token_TG)
 
 
 def open_json(name):
@@ -234,11 +239,14 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
 
 
 
-def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
+def run_parser(message, name_j, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
     try:
         user_from_group(name_j, group_id, token, ban_city, fields, filtre_age)
+        tr=True
     except:
         print("Не удалось получить информацию о пользователях")
+        bot.send_message(message.chat.id, message.text[11:] + " Не верный ID группы")
+        tr=False
     json_open = open_json(f"{name_j}.json")
 
     n=len(json_open)
@@ -249,7 +257,8 @@ def run_parser(name_j, group_id, token, ban_city, fields, filtre_age, football_k
         print("i=", i)
         js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
         safe_json(name_j,js_gr)
-    print("всё")
+    if tr:
+        bot.send_message(message.chat.id, "Группа " + group_id + " пропаршена")
     json_open = open_json(f"{name_j}.json")
     return json_open
 
@@ -259,7 +268,7 @@ def safe_json(name_js,file):
     f.close()
 
 
-def data_parsing(group_id, token, find_params):
+def data_parsing(message, name_file, group_id, token, find_params):
 
     fields_group = find_params["fields_groups"]
     fields = find_params["fields"]
@@ -269,12 +278,18 @@ def data_parsing(group_id, token, find_params):
     ban_activity = find_params["ban_activity"]
     if not os.path.isdir("DB"):
         os.mkdir("DB")
-    day = "DB/" + date.today().strftime("%d_%m_%Y")
-    if not os.path.isfile(f"{day}.json"):
-        a=[]
-        safe_json(day,a)
+    if name_file=="_":
+        day = "DB/" + date.today().strftime("%d_%m_%Y")
+        if not os.path.isfile(f"{day}.json"):
+            a=[]
+            safe_json(day,a)
+    else:
+        day="DB/" + name_file
+        if not os.path.isfile(f"{day}.json"):
+            a = []
+            safe_json(day, a)
 
-    new_json=run_parser(day, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
+    new_json=run_parser(message, day, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
     if not os.path.isfile("people_open.json"):
         a = []
         safe_json("people_open", a)
