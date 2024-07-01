@@ -261,7 +261,7 @@ def run_parser(message, name_j, group_id, token, ban_city, fields, filtre_age, f
 
     n=len(json_open)
     print(n)
-    time.sleep(2)
+    # time.sleep(0,5)
 
     for i in range(n//8):
         print("i=", i)
