@@ -53,6 +53,7 @@ def parse_data(message):
     for group in group_mass:
         print(group)
         bot.send_message(message.chat.id, "парсинг группы "+group)
+        bot.send_message(message.chat.id, "бот уведомит о завершение работы")
         time.sleep(2)
         try:
             data_parsing(message, file_name, group, token_VK, find_params)
