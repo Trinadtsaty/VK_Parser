@@ -113,10 +113,12 @@ def get_data(message):
 @bot.message_handler(commands=["help"])
 def send(message):
     bot.send_message(message.chat.id, "<b>Любые действия с кодом занимают определённое время, бот уведомит вас по завершении работы</b>", parse_mode="html")
-    bot.send_message(message.chat.id, "/dop_search + ID группы - программа пропарсит группу(ы).\nМожно вводить  несколько групп, через пробелы.\nПри вводе во время запроса 'file_name=*название файла, без пробелов*' программа сохранит результаты работы в отдельный json файл")
+    bot.send_message(message.chat.id, "/dop_search + ID группы - программа пропарсит группу(ы).\nМожно вводить  несколько групп, через пробелы.\nПри вводе во время запроса \"file_name=*название файла, без пробелов*\" программа сохранит результаты работы в отдельный json файл")
     bot.send_message(message.chat.id, "/start  - программа пропарсит заранее сохранённые группы, это займет какое-то время, ждите")
-    bot.send_message(message.chat.id, "/get_data - программа выведит людей.\nЕсли дополнительно передать аргумент 'file_name=*название файла, без пробелов*' тогда программа, выдаст людей из нужного json файла")
+    bot.send_message(message.chat.id, "/get_data - программа выведит людей.\nЕсли дополнительно передать аргумент \"file_name=*название файла, без пробелов*\" тогда программа, выдаст людей из нужного json файла")
     bot.send_message(message.chat.id, "/all_file - программа выдаёт название всех ранее сохранённых файлов")
+    bot.send_message(message.chat.id, "/delete \"file_name=*название файла, без пробелов*\" удаляет указаный json файл\n<i>Пример: \"/delete file_name=test\"</i>", parse_mode="html")
+    bot.send_message(message.chat.id, "<b>Gри указании имени файла, не нужно укахывать расширение\n</b><i>Пример: \"/get_data file_name=file1\"</i>", parse_mode="html")
 
 @bot.message_handler(commands=["all_file"])
 def all_file(message):
@@ -132,6 +134,29 @@ def all_file(message):
         bot.send_message(message.chat.id, "Файлы отсутсвуют")
     time.sleep(0.5)
     bot.send_message(message.chat.id, "Команда /all_file завершила работу")
+
+
+@bot.message_handler(commands=["delete"])
+def delete(message):
+    message_a = message.text[7:].split()
+    print(message_a)
+    file_name="_"
+    for item in message_a:
+        if "file_name=" in item:
+            file_name = item[10:]
+            print(file_name)
+    if file_name=="_":
+        bot.send_message(message.chat.id, "Укажите название файла")
+    else:
+        new_file_name="DB/" + file_name + ".json"
+
+        if not os.path.isfile(new_file_name):
+            bot.send_message(message.chat.id, "Данного файла не существует")
+        else:
+            os.remove(new_file_name)
+            bot.send_message(message.chat.id, "Файл "+file_name+" удалён")
+    bot.send_message(message.chat.id, "Команда /delete завершила работу")
+
 
 @bot.message_handler()
 def info(message):
