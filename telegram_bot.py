@@ -117,8 +117,15 @@ def send(message):
     bot.send_message(message.chat.id, "/start  - программа пропарсит заранее сохранённые группы, это займет какое-то время, ждите")
     bot.send_message(message.chat.id, "/get_data - программа выведит людей.\nЕсли дополнительно передать аргумент \"file_name=*название файла, без пробелов*\" тогда программа, выдаст людей из нужного json файла")
     bot.send_message(message.chat.id, "/all_file - программа выдаёт название всех ранее сохранённых файлов")
-    bot.send_message(message.chat.id, "/delete \"file_name=*название файла, без пробелов*\" удаляет указаный json файл\n<i>Пример: \"/delete file_name=test\"</i>", parse_mode="html")
-    bot.send_message(message.chat.id, "<b>Gри указании имени файла, не нужно укахывать расширение\n</b><i>Пример: \"/get_data file_name=file1\"</i>", parse_mode="html")
+    bot.send_message(message.chat.id, "/delete \"file_name=*название файла, без пробелов*\" удаляет указаный json файл\nПример: \"<code>/delete file_name=test</code>\"", parse_mode="html")
+    bot.send_message(message.chat.id, "<b>При указании имени файла, не нужно укахывать расширение\n</b>Пример: \"<code>/get_data file_name=file1</code>\"", parse_mode="html")
+    # bot.send_message(message.chat.id,
+    #                  "/delete \"file_name=*название файла, без пробелов*\" удаляет указаный json файл\nПример: <pre>/delete file_name=test</pre>",
+    #                  parse_mode="html")
+    # bot.send_message(message.chat.id,
+    #                  "<b>При указании имени файла, не нужно укахывать расширение\n</b>Пример: <pre>/get_data file_name=file1</pre>",
+    #                  parse_mode="html")
+
 
 @bot.message_handler(commands=["all_file"])
 def all_file(message):
