@@ -1,5 +1,5 @@
-
-
+token=""
+token_TG=""
 
 find_params = {
     "fields_groups" : "activity,deactivated,description,is_closed",
