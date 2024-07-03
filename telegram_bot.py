@@ -1,9 +1,11 @@
 import time
 
 import telebot
+from Config import tokens
 from CODE import data_parsing
 from add_tok import find_params, token, token_TG
 import pandas as pd
+from datetime import date
 import os
 
 
@@ -34,7 +36,7 @@ def dop_search(message):
             print(item)
             time.sleep(0.2)
             try:
-                data_parsing(message, file_name, item, token_VK, find_params)
+                new_p=data_parsing(message, file_name, item, token_VK, find_params)
             except:
                 bot.send_message(message.chat.id, "Ошибка в работе Бота")
     time.sleep(0.2)
@@ -46,13 +48,14 @@ def parse_data(message):
     group_mass=find_params["group_mass"]
     print(group_mass)
     token_VK = token
+    bot.send_message(message.chat.id, "Вам придёт уведомление о завершении работы")
     for group in group_mass:
         print(group)
         bot.send_message(message.chat.id, "парсинг группы "+group)
-        bot.send_message(message.chat.id, "бот уведомит о завершение работы")
+
         time.sleep(0.2)
         try:
-            data_parsing(message, file_name, group, token_VK, find_params)
+            new_p=data_parsing(message, file_name, group, token_VK, find_params)
         except:
             bot.send_message(message.chat.id, "Ошибка в работе Бота")
     time.sleep(0.2)

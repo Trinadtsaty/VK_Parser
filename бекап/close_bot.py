@@ -23,8 +23,9 @@ def request_zapros(url):
         except:
             pass
     src = req.json()
+    print(src)
     posts = src["response"]["items"]
-    time.sleep(0.25)
+    time.sleep(0.26)
     return posts
 
 def open_json(name):
@@ -54,14 +55,14 @@ def parsing_close(token):
     football_groups="football_groups"
     people_close = "people_close"
 
-    if not os.path.isfile("people_close.json"):
+    if not os.path.isfile("../people_close.json"):
         a = []
         safe_json(people_close, a)
         json_close = open_json("people_close.json")
     else:
         json_close = open_json("people_close.json")
 
-    if not os.path.isfile("football_groups.json"):
+    if not os.path.isfile("../football_groups.json"):
         a = []
         safe_json(football_groups, a)
         json_groups = open_json("football_groups.json")
@@ -72,7 +73,7 @@ def parsing_close(token):
     print("кол-во человек", count_p)
     count_g=len(json_groups)
     print("кол-во групп", count_g)
-    form=count_g*count_p//4//60
+    form=count_g//4//60
     print("Приблиительное время работы бота: "+str(form)+" мин.")
     # bot.send_message(message.chat.id, "Приблиительное время работы бота: "+str(form)+" мин.")
     time.sleep(1)
@@ -81,7 +82,10 @@ def parsing_close(token):
         time_start = time.time()
         j += 1
         print("группа номер: ", j)
+
+
         humans = glue_mass_people_close(group["ID"], token)
+
         time_stop = time.time()
         print("время на выполнение:", "{:.2f}".format(time_stop - time_start), "сек.")
         k=0
@@ -115,6 +119,6 @@ def parsing_close(token):
 
 
 time_start_1=time.time()
-print(time_start_1)
+# print(time_start_1)
 parsing_close(token)
 print("время выполнения:", time.time()-time_start_1, "сек.")

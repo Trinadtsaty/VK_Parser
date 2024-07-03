@@ -32,12 +32,7 @@ def request_zapros(url):
     session = requests.Session()
     session.mount('http://', HTTPAdapter(max_retries=retries))
     session.mount('https://', HTTPAdapter(max_retries=retries))
-    while True:
-        try:
-            req = requests.get(url)
-            break
-        except:
-            pass
+    req = requests.get(url)
     src = req.json()
     posts = src["response"]["items"]
     time.sleep(0.2)
@@ -200,23 +195,23 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
         if js_a["ID"] not in mass_id:
             json_open.append(js_a)
 
-    mass_id = []
-    for item in json_close:
-        mass_id.append(item["ID"])
-
-    for item in close_posts:
-        id_a = item["id"]
-        link = "https://vk.com/id" + str(id_a)
-        js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
-        if js_a["ID"] not in mass_id:
-            json_close.append(js_a)
+    # mass_id = []
+    # for item in json_close:
+    #     mass_id.append(item["ID"])
+    #
+    # for item in close_posts:
+    #     id_a = item["id"]
+    #     link = "https://vk.com/id" + str(id_a)
+    #     js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
+    #     if js_a["ID"] not in mass_id:
+    #         json_close.append(js_a)
 
     safe_json(name_j, json_open)
+    #
+    # safe_json(people_close, json_close)
 
-    safe_json(people_close, json_close)
 
-
-    return json_open, json_close
+    return json_open
 
 def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     group_mass = open_json("football_groups.json")
@@ -249,7 +244,7 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
         if data not in group_mass:
             group_mass.append(data)
         append_js.append(data)
-    f = codecs.open("бекап/football_groups.json", "w", "utf_8")
+    f = codecs.open("football_groups.json", "w", "utf_8")
     json.dump(group_mass, f)
     f.close()
     return append_js, all_groups
@@ -270,10 +265,10 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
             for i in range(n):
                 try:
                     user_id = item["ID"]
-                    js_a, js_gall=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
+                    js_a, js_g_all=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
                     item["GROUPS"] = js_a
-                    item["ALL_GROUPS"] = js_gall
+                    item["ALL_GROUPS"] = js_g_all
                     break
                 except:
                     print("error, restart")
