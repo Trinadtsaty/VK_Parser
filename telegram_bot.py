@@ -1,13 +1,9 @@
 import time
 
 import telebot
-from Config import tokens
 from CODE import data_parsing
-from Config import find_params
-from add_tok import token
-from add_tok import token_TG
+from add_tok import find_params, token, token_TG
 import pandas as pd
-from datetime import date
 import os
 
 
@@ -36,12 +32,12 @@ def dop_search(message):
             bot.send_message(message.chat.id, "парсинг группы "+item)
 
             print(item)
-            time.sleep(2)
+            time.sleep(0.2)
             try:
                 data_parsing(message, file_name, item, token_VK, find_params)
             except:
                 bot.send_message(message.chat.id, "Ошибка в работе Бота")
-    time.sleep(0.5)
+    time.sleep(0.2)
     bot.send_message(message.chat.id, "Команда /dop_search завершила работу")
 
 @bot.message_handler(commands=["start"])
@@ -54,12 +50,12 @@ def parse_data(message):
         print(group)
         bot.send_message(message.chat.id, "парсинг группы "+group)
         bot.send_message(message.chat.id, "бот уведомит о завершение работы")
-        time.sleep(2)
+        time.sleep(0.2)
         try:
             data_parsing(message, file_name, group, token_VK, find_params)
         except:
             bot.send_message(message.chat.id, "Ошибка в работе Бота")
-    time.sleep(0.5)
+    time.sleep(0.2)
     bot.send_message(message.chat.id, "Команда /start завершила работу")
 
 @bot.message_handler(commands=["get_data"])
@@ -105,7 +101,7 @@ def get_data(message):
         #
         # slice_str = slice.to_string()
         # bot.send_message(message.chat.id, slice_str)
-    time.sleep(0.5)
+    time.sleep(0.2)
     bot.send_message(message.chat.id, "Команда /get_data завершила работу")
 
 

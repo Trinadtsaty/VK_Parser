@@ -1,14 +1,16 @@
-import requests
+
 import telebot
-from add_tok import token
 import codecs
 import json
 from datetime import date
 import time
 import numpy as np
 import os
-from add_tok import token_TG
-from Config import find_params
+from add_tok import token_TG, find_params, token
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 
 
 
@@ -26,7 +28,16 @@ def open_json(name):
 
 
 def request_zapros(url):
-    req = requests.get(url)
+    retries = Retry(total=10, backoff_factor=0.2)
+    session = requests.Session()
+    session.mount('http://', HTTPAdapter(max_retries=retries))
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    while True:
+        try:
+            req = requests.get(url)
+            break
+        except:
+            pass
     src = req.json()
     posts = src["response"]["items"]
     time.sleep(0.2)
@@ -159,9 +170,18 @@ def filter_group_keyword(gruops, football_keyword):
 
 def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
     json_open = open_json(f"{name_j}.json")
+    people_close = "people_close"
+
+    if not os.path.isfile("people_close.json"):
+        a = []
+        safe_json(people_close, a)
+    else:
+        json_close = open_json("people_close.json")
+
     mass_id=[]
     for item in json_open:
         mass_id.append(item["ID"])
+
 
 
     posts = glue_mass_people(fields, group_id, token)
@@ -180,10 +200,23 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
         if js_a["ID"] not in mass_id:
             json_open.append(js_a)
 
-    safe_json(name_j,json_open)
+    mass_id = []
+    for item in json_close:
+        mass_id.append(item["ID"])
+
+    for item in close_posts:
+        id_a = item["id"]
+        link = "https://vk.com/id" + str(id_a)
+        js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
+        if js_a["ID"] not in mass_id:
+            json_close.append(js_a)
+
+    safe_json(name_j, json_open)
+
+    safe_json(people_close, json_close)
 
 
-    return json_open
+    return json_open, json_close
 
 def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     group_mass = open_json("football_groups.json")
@@ -216,7 +249,7 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
         if data not in group_mass:
             group_mass.append(data)
         append_js.append(data)
-    f = codecs.open("football_groups.json", "w", "utf_8")
+    f = codecs.open("бекап/football_groups.json", "w", "utf_8")
     json.dump(group_mass, f)
     f.close()
     return append_js, all_groups
@@ -232,16 +265,18 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
         j+=1
         print("number=",j)
         test=item.get("GROUPS", "NaN")
+        n=len(people)
         if test=="NaN":
-            try:
-                user_id = item["ID"]
-                js_a, js_gall=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
+            for i in range(n):
+                try:
+                    user_id = item["ID"]
+                    js_a, js_gall=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
-                item["GROUPS"] = js_a
-                item["ALL_GROUPS"] = js_gall
-            except:
-                print("error, restart")
-                break
+                    item["GROUPS"] = js_a
+                    item["ALL_GROUPS"] = js_gall
+                    break
+                except:
+                    print("error, restart")
 
     return people
 
@@ -259,14 +294,11 @@ def run_parser(message, name_j, group_id, token, ban_city, fields, filtre_age, f
         tr=False
     json_open = open_json(f"{name_j}.json")
 
-    n=len(json_open)
-    print(n)
+    # n=len(json_open)
+    # print(n)
     # time.sleep(0,5)
-
-    for i in range(n//8):
-        print("i=", i)
-        js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
-        safe_json(name_j,js_gr)
+    js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
+    safe_json(name_j,js_gr)
     if tr:
         bot.send_message(message.chat.id, "Группа " + group_id + " пропаршена")
     json_open = open_json(f"{name_j}.json")
@@ -319,23 +351,4 @@ def data_parsing(message, name_file, group_id, token, find_params):
     return new_people
 
 
-# name="people_open"
-fields_group = "activity,deactivated,description,is_closed"
-group_id="footballpremierleague_hse"
-#group_id="222824253"
-fields = "sex,is_closed,city,bdate,deactivated"
-ban_city=["Санкт-Петербург"]
-football_keyword=["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"]
-group_teg=["Спортивная команда", "Спортивная организация", ""]
-filtre_age=1000000
-ban_activity=""
-# name="people_open_with_groups.json"
-
-
-# group_id="222824253"
-# templates=data_parsing(group_id, token, find_params)
-# # j=0
-# # for i in templates:
-# #     j+=1
-# #     print(j, i)
 

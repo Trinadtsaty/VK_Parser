@@ -1,13 +1,11 @@
 import time
 
 import telebot
-from Config import tokens
 from CODE import data_parsing
-from Config import find_params
+from бекап.Config import find_params
 from add_tok import token
 from add_tok import token_TG
 import pandas as pd
-from datetime import date
 import os
 
 
