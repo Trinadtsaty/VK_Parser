@@ -11,6 +11,6 @@ find_params = {
     "football_keyword" : ["Football","Футбол","Football","ФУТБОЛ","FOOTBALL","футбол","football", "ФК", "фк"],
     "filtre_age" : 1000000,
     "ban_activity" : "",
-    "group_mass" : ["222824253","footballpremierleague_hse"]
+    "group_mass" : ["hse_overheard","podslushanoxce",hse]
 }
 
