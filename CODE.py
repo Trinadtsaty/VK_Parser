@@ -165,21 +165,20 @@ def filter_group_keyword(gruops, football_keyword):
 
 def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
     json_open = open_json(f"{name_j}.json")
-    # people_close = "people_close"
 
-    # if not os.path.isfile("people_close.json"):
-    #     a = []
-    #     safe_json(people_close, a)
-    # else:
-    #     json_close = open_json("people_close.json")
 
     mass_id=[]
     for item in json_open:
         mass_id.append(item["ID"])
 
 
+    for i in range(10):
+        try:
+            posts = glue_mass_people(fields, group_id, token)
+            break
+        except:
+            pass
 
-    posts = glue_mass_people(fields, group_id, token)
     posts=filter_banned(posts)
     posts= filter_sex(posts)
     posts, close_posts = filter_close(posts)
@@ -195,20 +194,8 @@ def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
         if js_a["ID"] not in mass_id:
             json_open.append(js_a)
 
-    # mass_id = []
-    # for item in json_close:
-    #     mass_id.append(item["ID"])
-    #
-    # for item in close_posts:
-    #     id_a = item["id"]
-    #     link = "https://vk.com/id" + str(id_a)
-    #     js_a = {"ID": id_a, "LINK": link, "CITY": "NaN", "AGE": "NaN"}
-    #     if js_a["ID"] not in mass_id:
-    #         json_close.append(js_a)
 
     safe_json(name_j, json_open)
-    #
-    # safe_json(people_close, json_close)
 
 
     return json_open
@@ -256,6 +243,7 @@ def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
 def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group):
     people=open_json(f"{name_j}.json")
     j=0
+    print(len(people))
     for item in people:
         j+=1
         print("number=",j)
@@ -316,7 +304,9 @@ def data_parsing(message, name_file, group_id, token, find_params):
     if not os.path.isdir("DB"):
         os.mkdir("DB")
     if name_file=="_":
-        day = "DB/" + date.today().strftime("%d_%m_%Y")
+        # day = "DB/" + date.today().strftime("%d_%m_%Y")
+        day="DB/"+"all_people"
+
         if not os.path.isfile(f"{day}.json"):
             a=[]
             safe_json(day,a)
