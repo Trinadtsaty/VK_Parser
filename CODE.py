@@ -165,13 +165,13 @@ def filter_group_keyword(gruops, football_keyword):
 
 def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
     json_open = open_json(f"{name_j}.json")
-    people_close = "people_close"
+    # people_close = "people_close"
 
-    if not os.path.isfile("people_close.json"):
-        a = []
-        safe_json(people_close, a)
-    else:
-        json_close = open_json("people_close.json")
+    # if not os.path.isfile("people_close.json"):
+    #     a = []
+    #     safe_json(people_close, a)
+    # else:
+    #     json_close = open_json("people_close.json")
 
     mass_id=[]
     for item in json_open:
@@ -347,3 +347,33 @@ def data_parsing(message, name_file, group_id, token, find_params):
 
 
 
+def groups_sort(new_p):
+    mass=[]
+    for item in new_p:
+        if item["GROUPS"]!=[]:
+            mass.append(item)
+    return mass
+
+
+
+def new_people(new_p):
+    new_file = "DB_n/" + date.today().strftime("%d_%m_%Y")
+    if not os.path.isdir("DB_n"):
+        os.mkdir("DB_n")
+    if not os.path.isfile(f"{new_file}.json"):
+        a=[]
+        safe_json(new_file,a)
+
+    data = open_json(f"{new_file}.json")
+    new_p = groups_sort(new_p)
+
+    df=[]
+    for item in data:
+        df.append(item["ID"])
+
+    for item in new_p:
+        if item["ID"] not in df:
+            data.append(item)
+
+
+    safe_json(new_file,data)
