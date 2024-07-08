@@ -3,6 +3,7 @@ import telebot
 import codecs
 import json
 from datetime import date
+import datetime
 import time
 import numpy as np
 import os
@@ -17,6 +18,10 @@ from urllib3.util.retry import Retry
 
 bot = telebot.TeleBot(token_TG)
 
+def safe_json(name_js,file):
+    f = codecs.open(f"{name_js}.json", "w", "utf_8")
+    json.dump(file, f)
+    f.close()
 
 def open_json(name):
     with codecs.open(name, "r", "utf_8") as f:
@@ -28,7 +33,7 @@ def open_json(name):
 
 
 def request_zapros(url):
-    retries = Retry(total=10, backoff_factor=0.2)
+    retries = Retry(total=10, backoff_factor=0.3)
     session = requests.Session()
     session.mount('http://', HTTPAdapter(max_retries=retries))
     session.mount('https://', HTTPAdapter(max_retries=retries))
@@ -164,41 +169,48 @@ def filter_group_keyword(gruops, football_keyword):
 
 
 def user_from_group(name_j, group_id, token, ban_city, fields, filtre_age):
+
     json_open = open_json(f"{name_j}.json")
 
-
     mass_id=[]
+
     for item in json_open:
         mass_id.append(item["ID"])
-
 
     for i in range(10):
         try:
             posts = glue_mass_people(fields, group_id, token)
+            posts = filter_banned(posts)
+            posts = filter_sex(posts)
+            posts, close_posts = filter_close(posts)
+            posts = filter_city(posts, ban_city)
+            posts = filter_age(posts, filtre_age)
+            for item in posts:
+                id_a = item["id"]
+                link = "https://vk.com/id" + str(id_a)
+                city = item["city"]
+                age = item["age"]
+                js_a = {"ID": id_a, "LINK": link, "CITY": city, "AGE": age}
+                if js_a["ID"] not in mass_id:
+                    json_open.append(js_a)
             break
-        except:
-            pass
-
-    posts=filter_banned(posts)
-    posts= filter_sex(posts)
-    posts, close_posts = filter_close(posts)
-    posts = filter_city(posts,ban_city)
-    posts = filter_age(posts, filtre_age)
-
-    for item in posts:
-        id_a= item["id"]
-        link="https://vk.com/id" + str(id_a)
-        city=item["city"]
-        age=item["age"]
-        js_a = { "ID": id_a, "LINK": link, "CITY": city, "AGE": age}
-        if js_a["ID"] not in mass_id:
-            json_open.append(js_a)
-
+        except Exception as e:
+            error_message = str(e)
+            with codecs.open("log.txt", "a", "utf_8") as f:
+                f.write("Ошибка получения информации об участниках сообщества")
+                f.write("\n")
+                f.write(error_message)
+                f.write("\n")
+                current_time = datetime.datetime.now().time()
+                f.write(str(current_time))
+                f.write("\n")
+                f.write("\n")
+            print("Ошибка получения информации об участниках сообщества")
 
     safe_json(name_j, json_open)
 
-
     return json_open
+
 
 def groups_users(user_id, token, football_keyword, ban_activity, fields_group):
     group_mass = open_json("football_groups.json")
@@ -246,19 +258,30 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
     print(len(people))
     for item in people:
         j+=1
-        print("number=",j)
+        # print("number=",j)
         test=item.get("GROUPS", "NaN")
         n=len(people)
         if test=="NaN":
-            for i in range(n):
+            for i in range(10):
                 try:
+                    print("number=", j)
                     user_id = item["ID"]
                     js_a, js_g_all=groups_users(user_id, token, football_keyword, ban_activity,fields_group)
 
                     item["GROUPS"] = js_a
                     item["ALL_GROUPS"] = js_g_all
                     break
-                except:
+                except Exception as e:
+                    error_message = str(e)
+                    with codecs.open("log.txt", "a", "utf_8") as f:
+                        f.write("Ошибка при получение информации о подписках пользователя")
+                        f.write("\n")
+                        f.write(error_message)
+                        f.write("\n")
+                        current_time = datetime.datetime.now().time()
+                        f.write(str(current_time))
+                        f.write("\n")
+                        f.write("\n")
                     print("error, restart")
 
     return people
@@ -269,28 +292,45 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
 
 def run_parser(message, name_j, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group):
     try:
-        user_from_group(name_j, group_id, token, ban_city, fields, filtre_age)
-        tr=True
-    except:
-        print("Не удалось получить информацию о пользователях")
+        json_open=user_from_group(name_j, group_id, token, ban_city, fields, filtre_age)
+    except Exception as e:
+        error_message = str(e)
+        with codecs.open("log.txt", "a", "utf_8") as f:
+            f.write("Проблема с получением информации о пользователях сообщества")
+            f.write("\n")
+            f.write(error_message)
+            f.write("\n")
+            current_time = datetime.datetime.now().time()
+            f.write(str(current_time))
+            f.write("\n")
+            f.write("\n")
+        print("Проблема с получением информации о пользователях сообщества")
         bot.send_message(message.chat.id, message.text[11:] + " Не верный ID группы")
-        tr=False
-    json_open = open_json(f"{name_j}.json")
 
-    # n=len(json_open)
-    # print(n)
-    # time.sleep(0,5)
-    js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity,fields_group)
-    safe_json(name_j,js_gr)
-    if tr:
+    try:
+        js_gr = people_plus_groups(name_j, token, football_keyword, ban_activity, fields_group)
+        # print(name_j)
+        # print(js_gr)
+        # safe_json(name_j, js_gr)
         bot.send_message(message.chat.id, "Группа " + group_id + " пропаршена")
+    except Exception as e:
+        error_message = str(e)
+        with codecs.open("log.txt", "a", "utf_8") as f:
+            f.write("Не удалось получить информацию о пользователях")
+            f.write("\n")
+            f.write(error_message)
+            f.write("\n")
+            current_time = datetime.datetime.now().time()
+            f.write(str(current_time))
+            f.write("\n")
+            f.write("\n")
+        print("Не удалось получить информацию о пользователях")
+    safe_json(name_j, js_gr)
+    # safe_json(name_j, json_open)
     json_open = open_json(f"{name_j}.json")
-    return json_open
+    return js_gr
 
-def safe_json(name_js,file):
-    f = codecs.open(f"{name_js}.json", "w", "utf_8")
-    json.dump(file, f)
-    f.close()
+
 
 
 def data_parsing(message, name_file, group_id, token, find_params):
@@ -301,27 +341,31 @@ def data_parsing(message, name_file, group_id, token, find_params):
     football_keyword = find_params["football_keyword"]
     filtre_age = find_params["filtre_age"]
     ban_activity = find_params["ban_activity"]
+
     if not os.path.isdir("DB"):
         os.mkdir("DB")
+
     if name_file=="_":
-        # day = "DB/" + date.today().strftime("%d_%m_%Y")
-        day="DB/"+"all_people"
+        day="DB/"+group_id
 
         if not os.path.isfile(f"{day}.json"):
             a=[]
             safe_json(day,a)
     else:
         day="DB/" + name_file
+
         if not os.path.isfile(f"{day}.json"):
             a = []
             safe_json(day, a)
 
     new_json=run_parser(message, day, group_id, token, ban_city, fields, filtre_age, football_keyword, ban_activity, fields_group)
+
     if not os.path.isfile("people_open.json"):
         a = []
         safe_json("people_open", a)
 
     index_json=open_json("people_open.json")
+
     new_people=[]
     index_json_id = []
 
@@ -333,6 +377,8 @@ def data_parsing(message, name_file, group_id, token, find_params):
             index_json.append(item)
 
     safe_json("people_open",index_json)
+
+
     return new_people
 
 
@@ -346,7 +392,7 @@ def groups_sort(new_p):
 
 
 
-def new_people(new_p):
+def new_people_def(new_p):
     new_file = "DB_n/" + date.today().strftime("%d_%m_%Y")
     if not os.path.isdir("DB_n"):
         os.mkdir("DB_n")

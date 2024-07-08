@@ -1,8 +1,8 @@
 import time
 import codecs
 import telebot
-from Config import tokens
-from CODE import data_parsing, new_people
+import datetime
+from CODE import data_parsing, new_people_def
 from add_tok import find_params, token, token_TG
 import pandas as pd
 from datetime import date
@@ -43,8 +43,18 @@ def dop_search(message):
             try:
                 new_p=data_parsing(message, file_name, item, token_VK, find_params)
                 # print(new_p)
-                new_people(new_p)
-            except:
+                new_people_def(new_p)
+            except Exception as e:
+                error_message = str(e)
+                with codecs.open("log.txt", "a", "utf_8") as f:
+                    f.write("Не удалось получить информацию о пользователях")
+                    f.write("\n")
+                    f.write(error_message)
+                    f.write("\n")
+                    current_time = datetime.datetime.now().time()
+                    f.write(str(current_time))
+                    f.write("\n")
+                    f.write("\n")
                 bot.send_message(message.chat.id, "Ошибка в работе Бота")
 
     time.sleep(0.2)
@@ -54,18 +64,16 @@ def dop_search(message):
 def start(message):
     file_name='_'
     group_mass=find_params["group_mass"]
-    # print(group_mass)
     token_VK = token
     bot.send_message(message.chat.id, "Вам придёт уведомление о завершении работы")
     for group in group_mass:
-        # print(group)
         bot.send_message(message.chat.id, "парсинг группы "+group)
 
         time.sleep(0.2)
         # try:
         new_p=data_parsing(message, file_name, group, token_VK, find_params)
         # print(new_p)
-        new_people(new_p)
+        new_people_def(new_p)
         # except:
         #     bot.send_message(message.chat.id, "Ошибка в работе Бота")
 
