@@ -270,6 +270,7 @@ def people_plus_groups(name_j, token, football_keyword, ban_activity,fields_grou
 
                     item["GROUPS"] = js_a
                     item["ALL_GROUPS"] = js_g_all
+                    safe_json(name_j,people )
                     break
                 except Exception as e:
                     error_message = str(e)
